@@ -14,19 +14,21 @@ import javax.inject.Inject
 private const val NETWORK_ERROR_MESSAGE = "Couldn't reach Pixabay. Check your connection."
 private const val SERVER_ERROR_MESSAGE = "Something went wrong on the server."
 
-class ArtRepositoryImpl @Inject constructor(
-    private val artApi: ArtApi,
-) : ArtRepository {
-
-    override fun searchArt(query: String): Flow<Resource<List<ArtImage>>> = flow {
-        emit(Resource.Loading())
-        try {
-            val artImages = artApi.searchImages(query = query).hits.map { it.toArtImage() }
-            emit(Resource.Success(artImages))
-        } catch (e: IOException) {
-            emit(Resource.Error(NETWORK_ERROR_MESSAGE))
-        } catch (e: HttpException) {
-            emit(Resource.Error(SERVER_ERROR_MESSAGE))
-        }
+class ArtRepositoryImpl
+    @Inject
+    constructor(
+        private val artApi: ArtApi,
+    ) : ArtRepository {
+        override fun searchArt(query: String): Flow<Resource<List<ArtImage>>> =
+            flow {
+                emit(Resource.Loading())
+                try {
+                    val artImages = artApi.searchImages(query = query).hits.map { it.toArtImage() }
+                    emit(Resource.Success(artImages))
+                } catch (_: IOException) {
+                    emit(Resource.Error(NETWORK_ERROR_MESSAGE))
+                } catch (_: HttpException) {
+                    emit(Resource.Error(SERVER_ERROR_MESSAGE))
+                }
+            }
     }
-}
