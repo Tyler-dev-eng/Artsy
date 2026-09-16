@@ -41,26 +41,36 @@ private data class BottomNavItem(
     val icon: ImageVector,
 )
 
-private val BOTTOM_NAV_ITEMS = listOf(
-    BottomNavItem(Screen.Search, "SEARCH", Icons.Filled.Search),
-    BottomNavItem(Screen.Library, "LIBRARY", Icons.Filled.PhotoLibrary),
-)
+private val BOTTOM_NAV_ITEMS =
+    listOf(
+        BottomNavItem(Screen.Search, "SEARCH", Icons.Filled.Search),
+        BottomNavItem(Screen.Library, "LIBRARY", Icons.Filled.PhotoLibrary),
+    )
 
 private const val UNDERLINE_ROTATION_DEGREES = -6f
+private val NAV_ICON_SIZE = 28.dp
+private val NAV_LABEL_SPACING = 2.dp
+private val NAV_UNDERLINE_SPACING = 2.dp
+private val NAV_UNDERLINE_HEIGHT = 3.dp
+private val NAV_UNDERLINE_WIDTH_SELECTED = 32.dp
+private val NAV_UNDERLINE_WIDTH_UNSELECTED = 0.dp
 
 @Suppress("ktlint:standard:function-naming")
 @Composable
 fun ArtShelfBottomBar(navController: NavHostController) {
-    val currentRoute = navController.currentBackStackEntryAsState().value
-        ?.destination
-        ?.route
+    val currentRoute =
+        navController
+            .currentBackStackEntryAsState()
+            .value
+            ?.destination
+            ?.route
 
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(Background)
-            .navigationBarsPadding()
-            .padding(vertical = 20.dp),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .background(Background)
+                .navigationBarsPadding(),
         horizontalArrangement = Arrangement.SpaceEvenly,
     ) {
         BOTTOM_NAV_ITEMS.forEach { item ->
@@ -93,32 +103,34 @@ private fun BottomNavBarItem(
     val interactionSource = remember { MutableInteractionSource() }
 
     Column(
-        modifier = Modifier.clickable(
-            interactionSource = interactionSource,
-            indication = null,
-            onClick = onClick,
-        ),
+        modifier =
+            Modifier.clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                onClick = onClick,
+            ),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Icon(
             imageVector = item.icon,
             contentDescription = item.label,
             tint = tint,
-            modifier = Modifier.size(28.dp),
+            modifier = Modifier.size(NAV_ICON_SIZE),
         )
         Text(
             text = item.label,
             style = MaterialTheme.typography.labelLarge,
             color = labelColor,
-            modifier = Modifier.padding(top = 4.dp),
+            modifier = Modifier.padding(top = NAV_LABEL_SPACING),
         )
         Box(
-            modifier = Modifier
-                .padding(top = 4.dp)
-                .width(if (isSelected) 40.dp else 0.dp)
-                .height(3.dp)
-                .rotate(UNDERLINE_ROTATION_DEGREES)
-                .background(if (isSelected) SignalRed else Color.Transparent),
+            modifier =
+                Modifier
+                    .padding(top = NAV_UNDERLINE_SPACING)
+                    .width(if (isSelected) NAV_UNDERLINE_WIDTH_SELECTED else NAV_UNDERLINE_WIDTH_UNSELECTED)
+                    .height(NAV_UNDERLINE_HEIGHT)
+                    .rotate(UNDERLINE_ROTATION_DEGREES)
+                    .background(if (isSelected) SignalRed else Color.Transparent),
         )
     }
 }
