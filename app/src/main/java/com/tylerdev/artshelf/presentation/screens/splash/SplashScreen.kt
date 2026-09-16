@@ -2,10 +2,10 @@ package com.tylerdev.artshelf.presentation.screens.splash
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -32,6 +32,7 @@ import com.tylerdev.artshelf.presentation.ui.theme.PaperCream
 import com.tylerdev.artshelf.presentation.ui.theme.SignalRed
 import com.tylerdev.artshelf.presentation.ui.theme.SunflowerYellow
 import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.milliseconds
 
 private const val SPLASH_DISPLAY_DURATION_MILLIS = 2200L
 private const val BANNER_ROTATION_DEGREES = -4f
@@ -42,23 +43,25 @@ private const val STRIKE_ROTATION_DEGREES = -4f
 @Composable
 fun SplashScreen(onFinished: () -> Unit) {
     LaunchedEffect(Unit) {
-        delay(SPLASH_DISPLAY_DURATION_MILLIS)
+        delay(SPLASH_DISPLAY_DURATION_MILLIS.milliseconds)
         onFinished()
     }
 
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(InkBlack),
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(InkBlack),
     ) {
         DiagonalBanner(modifier = Modifier.align(Alignment.TopCenter))
 
         TopCornerLabels(modifier = Modifier.align(Alignment.TopCenter))
 
         Column(
-            modifier = Modifier
-                .align(Alignment.Center)
-                .padding(horizontal = 32.dp),
+            modifier =
+                Modifier
+                    .align(Alignment.Center)
+                    .padding(horizontal = 32.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             RadarTag()
@@ -75,8 +78,9 @@ fun SplashScreen(onFinished: () -> Unit) {
             )
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = "Unearth subversive movements, private exhibition " +
-                    "vaults, and radical contemporary canvas.",
+                text =
+                    "Unearth subversive movements, private exhibition " +
+                        "vaults, and radical contemporary canvas.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = OnSurfaceVariant,
                 textAlign = TextAlign.Center,
@@ -84,9 +88,10 @@ fun SplashScreen(onFinished: () -> Unit) {
         }
 
         TicketStubCard(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(horizontal = 24.dp, vertical = 40.dp),
+            modifier =
+                Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(horizontal = 24.dp, vertical = 40.dp),
         )
     }
 }
@@ -95,12 +100,13 @@ fun SplashScreen(onFinished: () -> Unit) {
 @Composable
 private fun DiagonalBanner(modifier: Modifier = Modifier) {
     Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(90.dp)
-            .padding(top = 60.dp)
-            .background(SignalRed.copy(alpha = 0.12f))
-            .rotate(BANNER_ROTATION_DEGREES),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .height(90.dp)
+                .padding(top = 60.dp)
+                .background(SignalRed.copy(alpha = 0.12f))
+                .rotate(BANNER_ROTATION_DEGREES),
         contentAlignment = Alignment.Center,
     ) {
         Text(
@@ -115,9 +121,10 @@ private fun DiagonalBanner(modifier: Modifier = Modifier) {
 @Composable
 private fun TopCornerLabels(modifier: Modifier = Modifier) {
     Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 24.dp),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp, vertical = 24.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         Text(
@@ -126,9 +133,10 @@ private fun TopCornerLabels(modifier: Modifier = Modifier) {
             color = OnSurfaceVariant,
         )
         Box(
-            modifier = Modifier
-                .background(SunflowerYellow, RoundedCornerShape(2.dp))
-                .padding(horizontal = 8.dp, vertical = 2.dp),
+            modifier =
+                Modifier
+                    .background(SunflowerYellow, RoundedCornerShape(2.dp))
+                    .padding(horizontal = 8.dp, vertical = 2.dp),
         ) {
             Text(
                 text = "ISSUE #42",
@@ -143,9 +151,10 @@ private fun TopCornerLabels(modifier: Modifier = Modifier) {
 @Composable
 private fun RadarTag() {
     Box(
-        modifier = Modifier
-            .background(PaperCream, RoundedCornerShape(2.dp))
-            .padding(horizontal = 10.dp, vertical = 4.dp),
+        modifier =
+            Modifier
+                .background(PaperCream, RoundedCornerShape(2.dp))
+                .padding(horizontal = 10.dp, vertical = 4.dp),
     ) {
         Text(
             text = "RADAR ACTIVE // CLASSIFIED",
@@ -160,11 +169,12 @@ private fun RadarTag() {
 private fun ArtsyIconBadge() {
     Box(contentAlignment = Alignment.TopEnd) {
         Box(
-            modifier = Modifier
-                .size(96.dp)
-                .rotate(ICON_ROTATION_DEGREES)
-                .background(SignalRed, RoundedCornerShape(20.dp))
-                .border(3.dp, InkBlack, RoundedCornerShape(20.dp)),
+            modifier =
+                Modifier
+                    .size(96.dp)
+                    .rotate(ICON_ROTATION_DEGREES)
+                    .background(SignalRed, RoundedCornerShape(20.dp))
+                    .border(3.dp, InkBlack, RoundedCornerShape(20.dp)),
             contentAlignment = Alignment.Center,
         ) {
             Text(
@@ -177,9 +187,10 @@ private fun ArtsyIconBadge() {
             text = "★",
             style = MaterialTheme.typography.titleLarge,
             color = SunflowerYellow,
-            modifier = Modifier
-                .padding(4.dp)
-                .rotate(12f),
+            modifier =
+                Modifier
+                    .padding(4.dp)
+                    .rotate(12f),
         )
     }
 }
@@ -194,11 +205,12 @@ private fun ArtsyWordmark() {
             color = PaperCream,
         )
         Box(
-            modifier = Modifier
-                .width(140.dp)
-                .height(4.dp)
-                .rotate(STRIKE_ROTATION_DEGREES)
-                .background(SignalRed),
+            modifier =
+                Modifier
+                    .width(140.dp)
+                    .height(4.dp)
+                    .rotate(STRIKE_ROTATION_DEGREES)
+                    .background(SignalRed),
         )
     }
 }
@@ -207,10 +219,11 @@ private fun ArtsyWordmark() {
 @Composable
 private fun TicketStubCard(modifier: Modifier = Modifier) {
     Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(PaperCream, RoundedCornerShape(4.dp))
-            .padding(horizontal = 16.dp, vertical = 12.dp),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .background(PaperCream, RoundedCornerShape(4.dp))
+                .padding(horizontal = 16.dp, vertical = 12.dp),
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -230,10 +243,11 @@ private fun TicketStubCard(modifier: Modifier = Modifier) {
         }
         Spacer(modifier = Modifier.height(8.dp))
         Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(6.dp)
-                .background(InkBlack),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(6.dp)
+                    .background(InkBlack),
         )
         Spacer(modifier = Modifier.height(8.dp))
         Row(
