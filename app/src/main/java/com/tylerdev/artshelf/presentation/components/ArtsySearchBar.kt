@@ -27,10 +27,13 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import com.tylerdev.artshelf.presentation.ui.theme.Background
 import com.tylerdev.artshelf.presentation.ui.theme.GalleryWhite
+import com.tylerdev.artshelf.presentation.ui.theme.Graphite
 import com.tylerdev.artshelf.presentation.ui.theme.InkBlack
 import com.tylerdev.artshelf.presentation.ui.theme.PaperCream
 import com.tylerdev.artshelf.presentation.ui.theme.SignalRed
@@ -50,7 +53,7 @@ private val SUBMIT_BUTTON_SHADOW_OFFSET = 2.dp
 private val SUBMIT_BUTTON_ICON_SIZE = 18.dp
 private const val SUBMIT_BUTTON_ROTATION_DEGREES = -2f
 
-private const val PLACEHOLDER_ALPHA = 0.6f
+private val QUERY_TEXT_LETTER_SPACING = (-0.01).em
 
 @Suppress("ktlint:standard:function-naming")
 @Composable
@@ -116,14 +119,18 @@ private fun SearchBarInput(
             Text(
                 text = placeholder,
                 style = MaterialTheme.typography.bodyMedium,
-                color = InkBlack.copy(alpha = PLACEHOLDER_ALPHA),
+                color = Graphite,
             )
         }
         BasicTextField(
             value = query,
             onValueChange = onQueryChange,
             singleLine = true,
-            textStyle = LocalTextStyle.current.merge(MaterialTheme.typography.bodyMedium).copy(color = InkBlack),
+            textStyle = LocalTextStyle.current.merge(MaterialTheme.typography.bodyMedium).copy(
+                color = InkBlack,
+                fontWeight = FontWeight.Medium,
+                letterSpacing = QUERY_TEXT_LETTER_SPACING,
+            ),
             cursorBrush = SolidColor(SignalRed),
         )
     }
