@@ -34,7 +34,7 @@ fun ArtShelfNavHost(
         NavHost(
             navController = navController,
             startDestination = Screen.Splash.route,
-            modifier = Modifier.padding(innerPadding),
+            modifier = Modifier.padding(bottom = innerPadding.calculateBottomPadding()),
         ) {
             composable(Screen.Splash.route) {
                 SplashScreen(

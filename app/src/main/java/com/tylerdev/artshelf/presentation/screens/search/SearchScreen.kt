@@ -14,6 +14,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.tylerdev.artshelf.presentation.components.ArtShelfTopBar
 import com.tylerdev.artshelf.presentation.screens.search.state.SearchUiState
 import com.tylerdev.artshelf.presentation.screens.search.viewmodel.SearchViewModel
 
@@ -26,7 +27,10 @@ fun SearchScreen(
     val query by viewModel.query.collectAsStateWithLifecycle()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    Scaffold(modifier = modifier.fillMaxSize()) { innerPadding ->
+    Scaffold(
+        modifier = modifier.fillMaxSize(),
+        topBar = { ArtShelfTopBar(title = "SEARCH") },
+    ) { innerPadding ->
         Column(modifier = Modifier.padding(innerPadding)) {
             OutlinedTextField(
                 value = query,

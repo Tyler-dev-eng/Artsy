@@ -6,11 +6,15 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import com.tylerdev.artshelf.presentation.components.ArtShelfTopBar
 
 @Suppress("ktlint:standard:function-naming")
 @Composable
 fun LibraryScreen(modifier: Modifier = Modifier) {
-    Scaffold(modifier = modifier.fillMaxSize()) { innerPadding ->
+    Scaffold(
+        modifier = modifier.fillMaxSize(),
+        topBar = { ArtShelfTopBar(title = "LIBRARY") },
+    ) { innerPadding ->
         Text(
             text = "Library",
             modifier = Modifier.padding(innerPadding),
