@@ -3,7 +3,6 @@ package com.tylerdev.artshelf.presentation.screens.library
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.tylerdev.artshelf.presentation.components.ArtShelfTopBar
@@ -15,9 +14,6 @@ fun LibraryScreen(modifier: Modifier = Modifier) {
         modifier = modifier.fillMaxSize(),
         topBar = { ArtShelfTopBar(title = "LIBRARY") },
     ) { innerPadding ->
-        Text(
-            text = "Library",
-            modifier = Modifier.padding(innerPadding),
-        )
+        LibraryEmptyState(modifier = Modifier.padding(innerPadding))
     }
 }
