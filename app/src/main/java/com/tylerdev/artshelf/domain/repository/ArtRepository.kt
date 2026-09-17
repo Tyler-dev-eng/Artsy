@@ -1,9 +1,9 @@
 package com.tylerdev.artshelf.domain.repository
 
+import androidx.paging.PagingData
 import com.tylerdev.artshelf.domain.model.ArtImage
-import com.tylerdev.artshelf.domain.util.Resource
 import kotlinx.coroutines.flow.Flow
 
 interface ArtRepository {
-    fun searchArt(query: String): Flow<Resource<List<ArtImage>>>
+    fun searchArt(query: String): Flow<PagingData<ArtImage>>
 }

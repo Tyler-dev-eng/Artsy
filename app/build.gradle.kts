@@ -102,6 +102,10 @@ dependencies {
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
 
+    // Paging
+    implementation(libs.androidx.paging.common)
+    implementation(libs.androidx.paging.compose)
+
     // Unit Testing (local JVM)
     testImplementation(libs.junit)
     testImplementation(libs.truth)

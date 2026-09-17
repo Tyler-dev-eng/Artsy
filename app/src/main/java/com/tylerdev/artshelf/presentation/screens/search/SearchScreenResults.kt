@@ -19,7 +19,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -37,6 +39,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import androidx.paging.LoadState
+import androidx.paging.compose.LazyPagingItems
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
@@ -56,45 +60,45 @@ private val SECTION_GAP = 24.dp
 private val TOUCH_TARGET = 48.dp
 private val DEFAULT_CATEGORIES = listOf("All Works", "Paintings", "Sculpture", "Photography", "Surrealism")
 
-private sealed class FeedGroup {
+private sealed class FeedGroupSpec {
     data class Feature(
-        val art: ArtImage,
-    ) : FeedGroup()
+        val index: Int,
+    ) : FeedGroupSpec()
 
     data class Pair(
-        val first: ArtImage,
-        val second: ArtImage,
-    ) : FeedGroup()
+        val firstIndex: Int,
+        val secondIndex: Int,
+    ) : FeedGroupSpec()
 
     data class Banner(
-        val art: ArtImage,
-    ) : FeedGroup()
+        val index: Int,
+    ) : FeedGroupSpec()
 }
 
-private fun buildFeedGroups(artImages: List<ArtImage>): List<FeedGroup> {
-    val groups = mutableListOf<FeedGroup>()
+private fun buildFeedGroupSpecs(itemCount: Int): List<FeedGroupSpec> {
+    val groups = mutableListOf<FeedGroupSpec>()
     var cursor = 0
     var step = 0
-    while (cursor < artImages.size) {
-        val remaining = artImages.size - cursor
+    while (cursor < itemCount) {
+        val remaining = itemCount - cursor
         when (step % 3) {
             1 -> {
                 if (remaining >= 2) {
-                    groups += FeedGroup.Pair(artImages[cursor], artImages[cursor + 1])
+                    groups += FeedGroupSpec.Pair(cursor, cursor + 1)
                     cursor += 2
                 } else {
-                    groups += FeedGroup.Feature(artImages[cursor])
+                    groups += FeedGroupSpec.Feature(cursor)
                     cursor += 1
                 }
             }
 
             2 -> {
-                groups += FeedGroup.Banner(artImages[cursor])
+                groups += FeedGroupSpec.Banner(cursor)
                 cursor += 1
             }
 
             else -> {
-                groups += FeedGroup.Feature(artImages[cursor])
+                groups += FeedGroupSpec.Feature(cursor)
                 cursor += 1
             }
         }
@@ -107,12 +111,12 @@ private fun buildFeedGroups(artImages: List<ArtImage>): List<FeedGroup> {
 @Composable
 fun SearchScreenResults(
     query: String,
-    artImages: List<ArtImage>,
+    artItems: LazyPagingItems<ArtImage>,
     modifier: Modifier = Modifier,
     savedArtIds: Set<Long> = emptySet(),
     onSaveClick: (ArtImage) -> Unit = {},
 ) {
-    val feedGroups = remember(artImages) { buildFeedGroups(artImages) }
+    val feedGroups = remember(artItems.itemCount) { buildFeedGroupSpecs(artItems.itemCount) }
 
     LazyColumn(
         modifier = modifier.fillMaxSize(),
@@ -120,19 +124,22 @@ fun SearchScreenResults(
         verticalArrangement = Arrangement.spacedBy(SECTION_GAP),
     ) {
         item(key = "active-query-banner") {
-            ActiveQueryBanner(query = query, resultCount = artImages.size)
+            ActiveQueryBanner(query = query, resultCount = artItems.itemCount)
         }
         item(key = "category-filter-chips") {
             CategoryFilterChips(categories = DEFAULT_CATEGORIES)
         }
         itemsIndexed(feedGroups, key = { index, _ -> index }, contentType = { _, group -> group::class }) { index, group ->
             Column {
-                FeedGroupContent(group = group, savedArtIds = savedArtIds, onSaveClick = onSaveClick)
+                FeedGroupContent(group = group, artItems = artItems, savedArtIds = savedArtIds, onSaveClick = onSaveClick)
                 if (index != feedGroups.lastIndex) {
                     Spacer1()
                     DiscoveryDividerBand()
                 }
             }
+        }
+        item(key = "append-load-state") {
+            AppendLoadStateFooter(loadState = artItems.loadState.append, onRetry = artItems::retry)
         }
     }
 }
@@ -146,50 +153,95 @@ private fun Spacer1() {
 @Suppress("ktlint:standard:function-naming")
 @Composable
 private fun FeedGroupContent(
-    group: FeedGroup,
+    group: FeedGroupSpec,
+    artItems: LazyPagingItems<ArtImage>,
     savedArtIds: Set<Long>,
     onSaveClick: (ArtImage) -> Unit,
 ) {
     when (group) {
-        is FeedGroup.Feature -> {
+        is FeedGroupSpec.Feature -> {
+            val art = artItems[group.index] ?: return
             FeatureTile(
-                art = group.art,
-                isSaved = group.art.id in savedArtIds,
-                onSaveClick = { onSaveClick(group.art) },
+                art = art,
+                isSaved = art.id in savedArtIds,
+                onSaveClick = { onSaveClick(art) },
             )
         }
 
-        is FeedGroup.Banner -> {
+        is FeedGroupSpec.Banner -> {
+            val art = artItems[group.index] ?: return
             BannerTile(
-                art = group.art,
-                isSaved = group.art.id in savedArtIds,
-                onSaveClick = { onSaveClick(group.art) },
+                art = art,
+                isSaved = art.id in savedArtIds,
+                onSaveClick = { onSaveClick(art) },
             )
         }
 
-        is FeedGroup.Pair -> {
+        is FeedGroupSpec.Pair -> {
+            val first = artItems[group.firstIndex] ?: return
+            val second = artItems[group.secondIndex] ?: return
             Row(
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 PairTile(
-                    art = group.first,
+                    art = first,
                     aspectRatio = 3f / 4f,
                     rotationDegrees = 2f,
-                    isSaved = group.first.id in savedArtIds,
-                    onSaveClick = { onSaveClick(group.first) },
+                    isSaved = first.id in savedArtIds,
+                    onSaveClick = { onSaveClick(first) },
                     modifier = Modifier.weight(1f),
                 )
                 PairTile(
-                    art = group.second,
+                    art = second,
                     aspectRatio = 1f,
                     rotationDegrees = -3f,
-                    isSaved = group.second.id in savedArtIds,
-                    onSaveClick = { onSaveClick(group.second) },
+                    isSaved = second.id in savedArtIds,
+                    onSaveClick = { onSaveClick(second) },
                     modifier = Modifier.weight(1f),
                 )
             }
         }
+    }
+}
+
+@Suppress("ktlint:standard:function-naming")
+@Composable
+private fun AppendLoadStateFooter(
+    loadState: LoadState,
+    onRetry: () -> Unit,
+) {
+    when (loadState) {
+        is LoadState.Loading -> {
+            Box(modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(color = SignalRed)
+            }
+        }
+
+        is LoadState.Error -> {
+            Row(
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .defaultMinSize(minHeight = TOUCH_TARGET)
+                    .drawHardOffsetShadow(3.dp, InkBlack)
+                    .background(SignalRed)
+                    .clickable(onClick = onRetry)
+                    .semantics { contentDescription = "Retry loading more artwork" }
+                    .padding(vertical = 12.dp),
+            ) {
+                Icon(imageVector = Icons.Filled.Refresh, contentDescription = null, tint = GalleryWhite)
+                Text(
+                    text = "COULDN'T LOAD MORE — TAP TO RETRY",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = GalleryWhite,
+                    modifier = Modifier.padding(start = 8.dp),
+                )
+            }
+        }
+
+        is LoadState.NotLoading -> Unit
     }
 }
 

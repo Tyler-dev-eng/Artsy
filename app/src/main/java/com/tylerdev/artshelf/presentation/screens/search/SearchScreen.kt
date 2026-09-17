@@ -1,6 +1,7 @@
 package com.tylerdev.artshelf.presentation.screens.search
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,12 +16,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.paging.LoadState
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
+import com.tylerdev.artshelf.domain.model.ArtImage
 import com.tylerdev.artshelf.presentation.components.ArtShelfTopBar
 import com.tylerdev.artshelf.presentation.components.ArtsySearchBar
 import com.tylerdev.artshelf.presentation.screens.search.state.SearchUiState
 import com.tylerdev.artshelf.presentation.screens.search.viewmodel.SearchViewModel
+import retrofit2.HttpException
+import java.io.IOException
 
 private val SCREEN_HORIZONTAL_MARGIN = 20.dp
+private const val NETWORK_ERROR_MESSAGE = "Couldn't reach Pixabay. Check your connection."
+private const val SERVER_ERROR_MESSAGE = "Something went wrong on the server."
+private const val GENERIC_ERROR_MESSAGE = "Something went wrong."
 
 @Suppress("ktlint:standard:function-naming")
 @Composable
@@ -52,26 +62,13 @@ fun SearchScreen(
                         )
                     }
 
-                    is SearchUiState.Loading -> {
-                        CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                    }
-
-                    is SearchUiState.Empty -> {
-                        SearchScreenEmptyState(
-                            onTagClick = viewModel::onQueryChanged,
-                            onClearAndExploreClick = { viewModel.onQueryChanged("") },
-                        )
-                    }
-
-                    is SearchUiState.Error -> {
-                        Text(text = (uiState as SearchUiState.Error).message)
-                    }
-
-                    is SearchUiState.Success -> {
-                        val artImages = (uiState as SearchUiState.Success).artImages
-                        SearchScreenResults(
+                    is SearchUiState.Active -> {
+                        val artItems = viewModel.pagingDataFlow.collectAsLazyPagingItems()
+                        SearchScreenActiveContent(
                             query = query,
-                            artImages = artImages,
+                            artItems = artItems,
+                            onEmptyTagClick = viewModel::onQueryChanged,
+                            onEmptyClearAndExploreClick = { viewModel.onQueryChanged("") },
                         )
                     }
                 }
@@ -79,3 +76,43 @@ fun SearchScreen(
         }
     }
 }
+
+@Suppress("ktlint:standard:function-naming")
+@Composable
+private fun BoxScope.SearchScreenActiveContent(
+    query: String,
+    artItems: LazyPagingItems<ArtImage>,
+    onEmptyTagClick: (String) -> Unit,
+    onEmptyClearAndExploreClick: () -> Unit,
+) {
+    when (val refreshState = artItems.loadState.refresh) {
+        is LoadState.Loading -> {
+            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+        }
+
+        is LoadState.Error -> {
+            Text(
+                text = refreshState.error.toUserMessage(),
+                modifier = Modifier.align(Alignment.Center),
+            )
+        }
+
+        is LoadState.NotLoading -> {
+            if (artItems.itemCount == 0) {
+                SearchScreenEmptyState(
+                    onTagClick = onEmptyTagClick,
+                    onClearAndExploreClick = onEmptyClearAndExploreClick,
+                )
+            } else {
+                SearchScreenResults(query = query, artItems = artItems)
+            }
+        }
+    }
+}
+
+private fun Throwable.toUserMessage(): String =
+    when (this) {
+        is IOException -> NETWORK_ERROR_MESSAGE
+        is HttpException -> SERVER_ERROR_MESSAGE
+        else -> GENERIC_ERROR_MESSAGE
+    }

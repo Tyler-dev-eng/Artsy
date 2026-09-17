@@ -2,68 +2,58 @@ package com.tylerdev.artshelf.presentation.screens.search.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
+import com.tylerdev.artshelf.domain.model.ArtImage
 import com.tylerdev.artshelf.domain.usecase.SearchArtUseCase
-import com.tylerdev.artshelf.domain.util.Resource
 import com.tylerdev.artshelf.presentation.screens.search.state.SearchUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 
 private val SEARCH_DEBOUNCE = 300.milliseconds
+private const val UI_STATE_STOP_TIMEOUT_MILLIS = 5_000L
 
-@OptIn(FlowPreview::class)
+@OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class SearchViewModel
     @Inject
     constructor(
         private val searchArtUseCase: SearchArtUseCase,
     ) : ViewModel() {
-        private val _uiState = MutableStateFlow<SearchUiState>(SearchUiState.Idle)
-        val uiState: StateFlow<SearchUiState> = _uiState
-
         private val _query = MutableStateFlow("")
         val query: StateFlow<String> = _query
 
-        init {
-            viewModelScope.launch {
-                _query
-                    .debounce(SEARCH_DEBOUNCE)
-                    .distinctUntilChanged()
-                    .collectLatest { query -> searchArt(query) }
-            }
-        }
+        private val debouncedQuery: Flow<String> =
+            _query.debounce(SEARCH_DEBOUNCE).distinctUntilChanged()
+
+        val uiState: StateFlow<SearchUiState> =
+            debouncedQuery
+                .map { query -> if (query.isBlank()) SearchUiState.Idle else SearchUiState.Active }
+                .stateIn(
+                    scope = viewModelScope,
+                    started = SharingStarted.WhileSubscribed(UI_STATE_STOP_TIMEOUT_MILLIS),
+                    initialValue = SearchUiState.Idle,
+                )
+
+        val pagingDataFlow: Flow<PagingData<ArtImage>> =
+            debouncedQuery
+                .flatMapLatest { query -> if (query.isBlank()) emptyFlow() else searchArtUseCase(query) }
+                .cachedIn(viewModelScope)
 
         fun onQueryChanged(newQuery: String) {
             _query.value = newQuery
-        }
-
-        private suspend fun searchArt(query: String) {
-            if (query.isBlank()) {
-                _uiState.value = SearchUiState.Idle
-                return
-            }
-
-            searchArtUseCase(query).collectLatest { resource ->
-                _uiState.value =
-                    when (resource) {
-                        is Resource.Loading -> SearchUiState.Loading
-                        is Resource.Success -> {
-                            val artImages = resource.data.orEmpty()
-                            if (artImages.isEmpty()) {
-                                SearchUiState.Empty
-                            } else {
-                                SearchUiState.Success(artImages)
-                            }
-                        }
-                        is Resource.Error -> SearchUiState.Error(resource.message.orEmpty())
-                    }
-            }
         }
     }
