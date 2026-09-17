@@ -7,6 +7,7 @@ import com.tylerdev.artshelf.domain.model.ArtImage
 sealed class SearchUiState {
     data object Idle : SearchUiState()
     data object Loading : SearchUiState()
+    data object Empty : SearchUiState()
 
     @Immutable
     data class Success(val artImages: List<ArtImage>) : SearchUiState()

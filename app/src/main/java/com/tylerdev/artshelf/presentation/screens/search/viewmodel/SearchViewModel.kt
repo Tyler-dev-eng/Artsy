@@ -54,7 +54,14 @@ class SearchViewModel
                 _uiState.value =
                     when (resource) {
                         is Resource.Loading -> SearchUiState.Loading
-                        is Resource.Success -> SearchUiState.Success(resource.data.orEmpty())
+                        is Resource.Success -> {
+                            val artImages = resource.data.orEmpty()
+                            if (artImages.isEmpty()) {
+                                SearchUiState.Empty
+                            } else {
+                                SearchUiState.Success(artImages)
+                            }
+                        }
                         is Resource.Error -> SearchUiState.Error(resource.message.orEmpty())
                     }
             }

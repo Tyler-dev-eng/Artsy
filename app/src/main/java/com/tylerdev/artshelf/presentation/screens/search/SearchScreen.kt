@@ -50,6 +50,13 @@ fun SearchScreen(
                     CircularProgressIndicator()
                 }
 
+                is SearchUiState.Empty -> {
+                    SearchScreenEmptyState(
+                        onTagClick = viewModel::onQueryChanged,
+                        onClearAndExploreClick = { viewModel.onQueryChanged("") },
+                    )
+                }
+
                 is SearchUiState.Error -> {
                     Text(text = (uiState as SearchUiState.Error).message)
                 }
