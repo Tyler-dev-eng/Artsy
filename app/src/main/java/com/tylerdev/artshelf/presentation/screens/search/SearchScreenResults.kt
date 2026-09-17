@@ -145,7 +145,7 @@ fun SearchScreenResults(
                 ActiveQueryBanner(query = query, resultCount = artItems.itemCount)
             }
             item(key = "category-filter-chips") {
-                CategoryFilterChips(categories = DEFAULT_CATEGORIES)
+                CategoryFilterChips()
             }
             itemsIndexed(feedGroups, key = { index, _ -> index }, contentType = { _, group -> group::class }) { index, group ->
                 Column {
@@ -350,7 +350,7 @@ private fun ActiveQueryBanner(
 
 @Suppress("ktlint:standard:function-naming")
 @Composable
-private fun CategoryFilterChips(categories: List<String>) {
+private fun CategoryFilterChips(categories: List<String> = DEFAULT_CATEGORIES) {
     var selectedIndex by rememberSaveable { mutableIntStateOf(0) }
     Row(
         horizontalArrangement = Arrangement.spacedBy(10.dp),
