@@ -15,13 +15,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.WarningAmber
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -47,7 +45,6 @@ import com.tylerdev.artshelf.presentation.components.drawHardOffsetShadow
 import com.tylerdev.artshelf.presentation.ui.theme.GalleryWhite
 import com.tylerdev.artshelf.presentation.ui.theme.Graphite
 import com.tylerdev.artshelf.presentation.ui.theme.InkBlack
-import com.tylerdev.artshelf.presentation.ui.theme.OnSurfaceVariant
 import com.tylerdev.artshelf.presentation.ui.theme.PaperCream
 import com.tylerdev.artshelf.presentation.ui.theme.SignalRed
 import com.tylerdev.artshelf.presentation.ui.theme.SunflowerYellow
@@ -114,7 +111,6 @@ fun SearchScreenResults(
     modifier: Modifier = Modifier,
     savedArtIds: Set<Long> = emptySet(),
     onSaveClick: (ArtImage) -> Unit = {},
-    onIgniteClick: () -> Unit = {},
 ) {
     val feedGroups = remember(artImages) { buildFeedGroups(artImages) }
 
@@ -137,9 +133,6 @@ fun SearchScreenResults(
                     DiscoveryDividerBand()
                 }
             }
-        }
-        item(key = "underground-curation-callout") {
-            UndergroundCurationCallout(onIgniteClick = onIgniteClick)
         }
     }
 }
@@ -566,65 +559,3 @@ private fun DiscoveryDividerBand() {
     }
 }
 
-@Suppress("ktlint:standard:function-naming")
-@Composable
-private fun UndergroundCurationCallout(onIgniteClick: () -> Unit) {
-    Row(
-        horizontalArrangement = Arrangement.SpaceBetween,
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .graphicsLayer { rotationZ = -1f }
-                .drawHardOffsetShadow(4.dp, InkBlack)
-                .background(SurfaceContainerHigh)
-                .padding(16.dp),
-    ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    imageVector = Icons.Filled.WarningAmber,
-                    contentDescription = null,
-                    tint = SignalRed,
-                    modifier = Modifier.size(18.dp),
-                )
-                Spacer1Width()
-                Text(
-                    text = "UNDERGROUND CURATION",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = SunflowerYellow,
-                )
-            }
-            Text(
-                text = "CANNOT FIND YOUR REVOLUTION?",
-                style = MaterialTheme.typography.headlineLarge,
-                color = GalleryWhite,
-            )
-            Text(
-                text = "Submit visual manifesto cues to unlock private vault works.",
-                style = MaterialTheme.typography.bodySmall,
-                color = OnSurfaceVariant,
-            )
-        }
-        Spacer1Width()
-        Text(
-            text = "IGNITE",
-            style = MaterialTheme.typography.labelLarge,
-            color = GalleryWhite,
-            modifier =
-                Modifier
-                    .defaultMinSize(minHeight = TOUCH_TARGET)
-                    .graphicsLayer { rotationZ = -3f }
-                    .drawHardOffsetShadow(3.dp, InkBlack)
-                    .background(SignalRed)
-                    .clickable(onClick = onIgniteClick)
-                    .semantics { contentDescription = "Ignite underground curation request" }
-                    .padding(horizontal = 16.dp, vertical = 12.dp),
-        )
-    }
-}
-
-@Suppress("ktlint:standard:function-naming")
-@Composable
-private fun Spacer1Width() {
-    Box(modifier = Modifier.width(6.dp))
-}
