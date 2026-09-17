@@ -16,14 +16,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.HideImage
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.NorthEast
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
@@ -73,28 +71,31 @@ data class RecentSignal(
     val isStarred: Boolean = false,
 )
 
-private val DEFAULT_SEED_PROMPTS = listOf(
-    SeedPrompt("neo-dadaism", "#NEO-DADAISM", InkBlack, GalleryWhite, SignalRed, -2f),
-    SeedPrompt("cyber-punk origami", "CYBER-PUNK ORIGAMI", PaperCream, InkBlack, InkBlack, 2f, badge = "NEW"),
-    SeedPrompt("raw expressionism", "RAW EXPRESSIONISM", SignalRed, GalleryWhite, SunflowerYellow, -1f),
-    SeedPrompt("acid botanicals", "ACID BOTANICALS", InkBlack, SunflowerYellow, PaperCream, 3f),
-    SeedPrompt("brutalist archive", "BRUTALIST ARCHIVE", SurfaceContainerHigh, GalleryWhite, SignalRed, -3f),
-    SeedPrompt("street glitch", "STREET GLITCH", SunflowerYellow, InkBlack, InkBlack, 1f),
-)
+private val DEFAULT_SEED_PROMPTS =
+    listOf(
+        SeedPrompt("neo-dadaism", "#NEO-DADAISM", InkBlack, GalleryWhite, SignalRed, -2f),
+        SeedPrompt("cyber-punk origami", "CYBER-PUNK ORIGAMI", PaperCream, InkBlack, InkBlack, 2f, badge = "NEW"),
+        SeedPrompt("raw expressionism", "RAW EXPRESSIONISM", SignalRed, GalleryWhite, SunflowerYellow, -1f),
+        SeedPrompt("acid botanicals", "ACID BOTANICALS", InkBlack, SunflowerYellow, PaperCream, 3f),
+        SeedPrompt("brutalist archive", "BRUTALIST ARCHIVE", SurfaceContainerHigh, GalleryWhite, SignalRed, -3f),
+        SeedPrompt("street glitch", "STREET GLITCH", SunflowerYellow, InkBlack, InkBlack, 1f),
+    )
 
-private val DEFAULT_RECENT_SIGNALS = listOf(
-    RecentSignal("yellow flowers", "14:02 EST • 842 ARTWORKS", isStarred = true),
-    RecentSignal("brutalist concrete", "YESTERDAY • ARCHITECTURE ARCHIVE"),
-    RecentSignal("tokyo neon dusk", "2 DAYS AGO • STREET PHOTOGRAPHY"),
-)
+private val DEFAULT_RECENT_SIGNALS =
+    listOf(
+        RecentSignal("yellow flowers", "14:02 EST • 842 ARTWORKS", isStarred = true),
+        RecentSignal("brutalist concrete", "YESTERDAY • ARCHITECTURE ARCHIVE"),
+        RecentSignal("tokyo neon dusk", "2 DAYS AGO • STREET PHOTOGRAPHY"),
+    )
 
-private val HeadlineXlMobile = TextStyle(
-    fontFamily = AntonFontFamily,
-    fontWeight = FontWeight.Normal,
-    fontSize = 40.sp,
-    lineHeight = 42.sp,
-    letterSpacing = (-0.02).em,
-)
+private val HeadlineXlMobile =
+    TextStyle(
+        fontFamily = AntonFontFamily,
+        fontWeight = FontWeight.Normal,
+        fontSize = 40.sp,
+        lineHeight = 42.sp,
+        letterSpacing = (-0.02).em,
+    )
 
 @Suppress("ktlint:standard:function-naming")
 @Composable
@@ -110,10 +111,11 @@ fun SearchScreenInitialState(
     onClearAllSignals: () -> Unit = {},
 ) {
     Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = SCREEN_MARGIN),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = SCREEN_MARGIN),
     ) {
         Spacer(modifier = Modifier.height(16.dp))
         HeroManifesto()
@@ -146,16 +148,18 @@ private fun HeroManifesto() {
         )
         Spacer(modifier = Modifier.height(8.dp))
         Box(
-            modifier = Modifier
-                .fillMaxWidth(fraction = 0.75f)
-                .height(8.dp)
-                .graphicsLayer { rotationZ = -2f }
-                .background(SignalRed),
+            modifier =
+                Modifier
+                    .fillMaxWidth(fraction = 0.75f)
+                    .height(8.dp)
+                    .graphicsLayer { rotationZ = -2f }
+                    .background(SignalRed),
         )
         Spacer(modifier = Modifier.height(12.dp))
         Text(
-            text = "Type a movement, subversive artist, spectrum wavelength, or raw emotion into " +
-                "the radar stub above.",
+            text =
+                "Type a movement, subversive artist, spectrum wavelength, or raw emotion into " +
+                    "the radar stub above.",
             style = MaterialTheme.typography.bodyMedium,
             color = OnSurfaceVariant,
         )
@@ -167,11 +171,12 @@ private fun HeroManifesto() {
 private fun DispatchStencilTag() {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .graphicsLayer { rotationZ = -2f }
-            .drawHardOffsetShadow(3.dp, SunflowerYellow)
-            .background(InkBlack)
-            .padding(horizontal = 12.dp, vertical = 6.dp),
+        modifier =
+            Modifier
+                .graphicsLayer { rotationZ = -2f }
+                .drawHardOffsetShadow(3.dp, SunflowerYellow)
+                .background(InkBlack)
+                .padding(horizontal = 12.dp, vertical = 6.dp),
     ) {
         Box(modifier = Modifier.size(8.dp).background(SignalRed))
         Spacer(modifier = Modifier.width(6.dp))
@@ -230,18 +235,20 @@ private fun SeedPill(
 ) {
     Box(
         contentAlignment = Alignment.Center,
-        modifier = Modifier
-            .defaultMinSize(minHeight = TOUCH_TARGET)
-            .clickable(onClick = onClick)
-            .semantics { contentDescription = "Search seed ${prompt.label}" },
+        modifier =
+            Modifier
+                .defaultMinSize(minHeight = TOUCH_TARGET)
+                .clickable(onClick = onClick)
+                .semantics { contentDescription = "Search seed ${prompt.label}" },
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .graphicsLayer { rotationZ = prompt.rotationDegrees }
-                .drawHardOffsetShadow(3.dp, prompt.shadow)
-                .background(prompt.background)
-                .padding(horizontal = 14.dp, vertical = 8.dp),
+            modifier =
+                Modifier
+                    .graphicsLayer { rotationZ = prompt.rotationDegrees }
+                    .drawHardOffsetShadow(3.dp, prompt.shadow)
+                    .background(prompt.background)
+                    .padding(horizontal = 14.dp, vertical = 8.dp),
         ) {
             if (prompt.badge != null) {
                 Text(
@@ -265,12 +272,13 @@ private fun SeedPill(
 @Composable
 private fun FeaturedSpotlightCard(onInjectClick: () -> Unit) {
     Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .graphicsLayer { rotationZ = 1f }
-            .drawHardOffsetShadow(6.dp, SignalRed)
-            .background(InkBlack)
-            .padding(16.dp),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .graphicsLayer { rotationZ = 1f }
+                .drawHardOffsetShadow(6.dp, SignalRed)
+                .background(InkBlack)
+                .padding(16.dp),
     ) {
         Column {
             Row(
@@ -301,8 +309,9 @@ private fun FeaturedSpotlightCard(onInjectClick: () -> Unit) {
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = "Explore 140+ deconstructed floral prints, tactile oil studies, and " +
-                    "aggressive yellow pigment explorations.",
+                text =
+                    "Explore 140+ deconstructed floral prints, tactile oil studies, and " +
+                        "aggressive yellow pigment explorations.",
                 style = MaterialTheme.typography.bodySmall,
                 color = OnSurfaceVariant,
             )
@@ -316,11 +325,12 @@ private fun FeaturedSpotlightCard(onInjectClick: () -> Unit) {
 @Composable
 private fun FeaturedArtworkPreview() {
     Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .aspectRatio(16f / 10f)
-            .drawHardOffsetShadow(3.dp, InkBlack)
-            .background(SurfaceContainerLow),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .aspectRatio(16f / 10f)
+                .drawHardOffsetShadow(3.dp, InkBlack)
+                .background(SurfaceContainerLow),
         contentAlignment = Alignment.Center,
     ) {
         Icon(
@@ -333,17 +343,19 @@ private fun FeaturedArtworkPreview() {
             text = "99.4% HIT",
             style = MaterialTheme.typography.labelMedium,
             color = InkBlack,
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .background(SunflowerYellow)
-                .padding(horizontal = 8.dp, vertical = 2.dp),
+            modifier =
+                Modifier
+                    .align(Alignment.TopEnd)
+                    .background(SunflowerYellow)
+                    .padding(horizontal = 8.dp, vertical = 2.dp),
         )
         Column(
-            modifier = Modifier
-                .align(Alignment.BottomStart)
-                .graphicsLayer { rotationZ = -2f }
-                .background(PaperCream)
-                .padding(horizontal = 10.dp, vertical = 6.dp),
+            modifier =
+                Modifier
+                    .align(Alignment.BottomStart)
+                    .graphicsLayer { rotationZ = -2f }
+                    .background(PaperCream)
+                    .padding(horizontal = 10.dp, vertical = 6.dp),
         ) {
             Text(
                 text = "SOLARIS ARCHIVE // 04",
@@ -365,15 +377,16 @@ private fun InjectSeedButton(onClick: () -> Unit) {
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .fillMaxWidth()
-            .defaultMinSize(minHeight = TOUCH_TARGET)
-            .graphicsLayer { rotationZ = -1f }
-            .drawHardOffsetShadow(4.dp, PaperCream)
-            .background(SignalRed)
-            .clickable(onClick = onClick)
-            .semantics { contentDescription = "Inject curated seed" }
-            .padding(horizontal = 16.dp, vertical = 14.dp),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .defaultMinSize(minHeight = TOUCH_TARGET)
+                .graphicsLayer { rotationZ = -1f }
+                .drawHardOffsetShadow(4.dp, PaperCream)
+                .background(SignalRed)
+                .clickable(onClick = onClick)
+                .semantics { contentDescription = "Inject curated seed" }
+                .padding(horizontal = 16.dp, vertical = 14.dp),
     ) {
         Text(
             text = "INJECT CURATED SEED",
@@ -421,10 +434,11 @@ private fun RecentSignalsLedger(
                 text = "CLEAR LOG",
                 style = MaterialTheme.typography.labelSmall,
                 color = Outline,
-                modifier = Modifier
-                    .defaultMinSize(minHeight = TOUCH_TARGET)
-                    .clickable(onClick = onClearAllSignals)
-                    .semantics { contentDescription = "Clear all recent signals" },
+                modifier =
+                    Modifier
+                        .defaultMinSize(minHeight = TOUCH_TARGET)
+                        .clickable(onClick = onClearAllSignals)
+                        .semantics { contentDescription = "Clear all recent signals" },
             )
         }
         Spacer(modifier = Modifier.height(8.dp))
@@ -444,11 +458,12 @@ private fun RecentSignalsCard(
     onRemoveSignal: (String) -> Unit,
 ) {
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .drawHardOffsetShadow(4.dp, InkBlack)
-            .background(PaperCream)
-            .padding(16.dp),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .drawHardOffsetShadow(4.dp, InkBlack)
+                .background(PaperCream)
+                .padding(16.dp),
     ) {
         signals.forEachIndexed { index, signal ->
             RecentSignalRow(
@@ -490,11 +505,12 @@ private fun RecentSignalRow(
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .semantics { contentDescription = "Search recent term ${signal.term}" }
-            .padding(vertical = 8.dp),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .clickable(onClick = onClick)
+                .semantics { contentDescription = "Search recent term ${signal.term}" }
+                .padding(vertical = 8.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(
@@ -521,10 +537,11 @@ private fun RecentSignalRow(
             imageVector = Icons.Filled.Close,
             contentDescription = null,
             tint = InkBlack.copy(alpha = 0.4f),
-            modifier = Modifier
-                .size(TOUCH_TARGET / 2)
-                .clickable(onClick = onRemove)
-                .semantics { contentDescription = "Remove ${signal.term} from recent signals" },
+            modifier =
+                Modifier
+                    .size(TOUCH_TARGET / 2)
+                    .clickable(onClick = onRemove)
+                    .semantics { contentDescription = "Remove ${signal.term} from recent signals" },
         )
     }
 }
@@ -533,11 +550,12 @@ private fun RecentSignalRow(
 @Composable
 private fun EmptyLedgerNotice() {
     Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .drawHardOffsetShadow(4.dp, InkBlack)
-            .background(PaperCream)
-            .padding(24.dp),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .drawHardOffsetShadow(4.dp, InkBlack)
+                .background(PaperCream)
+                .padding(24.dp),
         contentAlignment = Alignment.Center,
     ) {
         Text(
