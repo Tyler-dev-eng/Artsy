@@ -43,7 +43,11 @@ fun SearchScreen(
 
             when (uiState) {
                 is SearchUiState.Idle -> {
-                    Unit
+                    SearchScreenInitialState(
+                        onSeedClick = viewModel::onQueryChanged,
+                        onFeaturedSeedClick = viewModel::onQueryChanged,
+                        onSignalClick = viewModel::onQueryChanged,
+                    )
                 }
 
                 is SearchUiState.Loading -> {
