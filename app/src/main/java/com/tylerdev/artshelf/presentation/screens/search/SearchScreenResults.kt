@@ -121,6 +121,7 @@ fun SearchScreenResults(
     modifier: Modifier = Modifier,
     savedArtIds: Set<Long> = emptySet(),
     onSaveClick: (ArtImage) -> Unit = {},
+    onArtClick: (ArtImage) -> Unit = {},
 ) {
     val feedGroups = remember(artItems.itemCount) { buildFeedGroupSpecs(artItems.itemCount) }
     val listState = rememberLazyListState()
@@ -142,7 +143,13 @@ fun SearchScreenResults(
             }
             itemsIndexed(feedGroups, key = { index, _ -> index }, contentType = { _, group -> group::class }) { index, group ->
                 Column {
-                    FeedGroupContent(group = group, artItems = artItems, savedArtIds = savedArtIds, onSaveClick = onSaveClick)
+                    FeedGroupContent(
+                        group = group,
+                        artItems = artItems,
+                        savedArtIds = savedArtIds,
+                        onSaveClick = onSaveClick,
+                        onArtClick = onArtClick,
+                    )
                     if (index != feedGroups.lastIndex) {
                         Spacer1()
                         DiscoveryDividerBand()
@@ -209,6 +216,7 @@ private fun FeedGroupContent(
     artItems: LazyPagingItems<ArtImage>,
     savedArtIds: Set<Long>,
     onSaveClick: (ArtImage) -> Unit,
+    onArtClick: (ArtImage) -> Unit,
 ) {
     when (group) {
         is FeedGroupSpec.Feature -> {
@@ -217,6 +225,7 @@ private fun FeedGroupContent(
                 art = art,
                 isSaved = art.id in savedArtIds,
                 onSaveClick = { onSaveClick(art) },
+                onClick = { onArtClick(art) },
             )
         }
 
@@ -226,6 +235,7 @@ private fun FeedGroupContent(
                 art = art,
                 isSaved = art.id in savedArtIds,
                 onSaveClick = { onSaveClick(art) },
+                onClick = { onArtClick(art) },
             )
         }
 
@@ -242,6 +252,7 @@ private fun FeedGroupContent(
                     rotationDegrees = 2f,
                     isSaved = first.id in savedArtIds,
                     onSaveClick = { onSaveClick(first) },
+                    onClick = { onArtClick(first) },
                     modifier = Modifier.weight(1f),
                 )
                 PairTile(
@@ -250,6 +261,7 @@ private fun FeedGroupContent(
                     rotationDegrees = -3f,
                     isSaved = second.id in savedArtIds,
                     onSaveClick = { onSaveClick(second) },
+                    onClick = { onArtClick(second) },
                     modifier = Modifier.weight(1f),
                 )
             }
@@ -347,6 +359,7 @@ private fun FeatureTile(
     art: ArtImage,
     isSaved: Boolean,
     onSaveClick: () -> Unit,
+    onClick: () -> Unit,
 ) {
     Box(
         modifier =
@@ -360,6 +373,7 @@ private fun FeatureTile(
                     .fillMaxWidth()
                     .drawHardOffsetShadow(6.dp, InkBlack)
                     .background(PaperCream)
+                    .clickable(onClick = onClick)
                     .padding(8.dp),
         ) {
             Box(
@@ -404,6 +418,7 @@ private fun PairTile(
     rotationDegrees: Float,
     isSaved: Boolean,
     onSaveClick: () -> Unit,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Box(modifier = modifier.graphicsLayer { rotationZ = rotationDegrees }) {
@@ -413,6 +428,7 @@ private fun PairTile(
                     .fillMaxWidth()
                     .drawHardOffsetShadow(4.dp, SignalRed)
                     .background(InkBlack)
+                    .clickable(onClick = onClick)
                     .padding(6.dp),
         ) {
             Box(
@@ -448,6 +464,7 @@ private fun BannerTile(
     art: ArtImage,
     isSaved: Boolean,
     onSaveClick: () -> Unit,
+    onClick: () -> Unit,
 ) {
     Box(
         modifier =
@@ -456,6 +473,7 @@ private fun BannerTile(
                 .graphicsLayer { rotationZ = 1f }
                 .drawHardOffsetShadow(6.dp, SunflowerYellow)
                 .background(InkBlack)
+                .clickable(onClick = onClick)
                 .padding(8.dp),
     ) {
         Box(

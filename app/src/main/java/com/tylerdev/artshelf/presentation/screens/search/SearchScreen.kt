@@ -36,6 +36,7 @@ private const val GENERIC_ERROR_MESSAGE = "Something went wrong."
 @Composable
 fun SearchScreen(
     modifier: Modifier = Modifier,
+    onArtClick: (ArtImage) -> Unit = {},
     viewModel: SearchViewModel = hiltViewModel(),
 ) {
     val query by viewModel.query.collectAsStateWithLifecycle()
@@ -70,6 +71,7 @@ fun SearchScreen(
                             artItems = artItems,
                             savedArtIds = savedArtIds,
                             onSaveClick = viewModel::onSaveClick,
+                            onArtClick = onArtClick,
                             onEmptyTagClick = viewModel::onQueryChanged,
                             onEmptyClearAndExploreClick = { viewModel.onQueryChanged("") },
                         )
@@ -87,6 +89,7 @@ private fun BoxScope.SearchScreenActiveContent(
     artItems: LazyPagingItems<ArtImage>,
     savedArtIds: Set<Long>,
     onSaveClick: (ArtImage) -> Unit,
+    onArtClick: (ArtImage) -> Unit,
     onEmptyTagClick: (String) -> Unit,
     onEmptyClearAndExploreClick: () -> Unit,
 ) {
@@ -114,6 +117,7 @@ private fun BoxScope.SearchScreenActiveContent(
                     artItems = artItems,
                     savedArtIds = savedArtIds,
                     onSaveClick = onSaveClick,
+                    onArtClick = onArtClick,
                 )
             }
         }
