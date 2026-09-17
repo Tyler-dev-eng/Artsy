@@ -49,7 +49,14 @@ fun ArtShelfNavHost(
                 SearchScreen()
             }
             composable(Screen.Library.route) {
-                LibraryScreen()
+                LibraryScreen(
+                    onExploreClick = {
+                        navController.navigate(Screen.Search.route) {
+                            popUpTo(navController.graph.startDestinationId)
+                            launchSingleTop = true
+                        }
+                    },
+                )
             }
         }
     }

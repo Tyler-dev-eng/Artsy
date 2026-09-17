@@ -29,6 +29,10 @@ class SavedArtRepositoryImpl
 
         override fun isArtSaved(id: Long): Flow<Boolean> = savedArtDao.isSaved(id)
 
+        override fun hasSavedArt(): Flow<Boolean> = savedArtDao.hasSavedArt()
+
+        override fun getSavedArtIds(): Flow<Set<Long>> = savedArtDao.getAllIds().map { it.toSet() }
+
         override suspend fun saveArt(artImage: ArtImage) {
             savedArtDao.upsert(artImage.toSavedArtEntity(savedAtEpochMillis = System.currentTimeMillis()))
         }

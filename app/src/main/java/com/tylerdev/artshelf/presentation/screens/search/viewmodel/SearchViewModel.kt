@@ -5,7 +5,9 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.tylerdev.artshelf.domain.model.ArtImage
+import com.tylerdev.artshelf.domain.usecase.GetSavedArtIdsUseCase
 import com.tylerdev.artshelf.domain.usecase.SearchArtUseCase
+import com.tylerdev.artshelf.domain.usecase.ToggleSaveArtUseCase
 import com.tylerdev.artshelf.presentation.screens.search.state.SearchUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -20,6 +22,7 @@ import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -32,6 +35,8 @@ class SearchViewModel
     @Inject
     constructor(
         private val searchArtUseCase: SearchArtUseCase,
+        private val toggleSaveArtUseCase: ToggleSaveArtUseCase,
+        getSavedArtIdsUseCase: GetSavedArtIdsUseCase,
     ) : ViewModel() {
         private val _query = MutableStateFlow("")
         val query: StateFlow<String> = _query
@@ -53,7 +58,19 @@ class SearchViewModel
                 .flatMapLatest { query -> if (query.isBlank()) emptyFlow() else searchArtUseCase(query) }
                 .cachedIn(viewModelScope)
 
+        val savedArtIds: StateFlow<Set<Long>> =
+            getSavedArtIdsUseCase()
+                .stateIn(
+                    scope = viewModelScope,
+                    started = SharingStarted.WhileSubscribed(UI_STATE_STOP_TIMEOUT_MILLIS),
+                    initialValue = emptySet(),
+                )
+
         fun onQueryChanged(newQuery: String) {
             _query.value = newQuery
+        }
+
+        fun onSaveClick(artImage: ArtImage) {
+            viewModelScope.launch { toggleSaveArtUseCase(artImage) }
         }
     }

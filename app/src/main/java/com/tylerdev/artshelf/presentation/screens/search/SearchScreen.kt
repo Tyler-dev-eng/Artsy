@@ -40,6 +40,7 @@ fun SearchScreen(
 ) {
     val query by viewModel.query.collectAsStateWithLifecycle()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val savedArtIds by viewModel.savedArtIds.collectAsStateWithLifecycle()
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -67,6 +68,8 @@ fun SearchScreen(
                         SearchScreenActiveContent(
                             query = query,
                             artItems = artItems,
+                            savedArtIds = savedArtIds,
+                            onSaveClick = viewModel::onSaveClick,
                             onEmptyTagClick = viewModel::onQueryChanged,
                             onEmptyClearAndExploreClick = { viewModel.onQueryChanged("") },
                         )
@@ -82,6 +85,8 @@ fun SearchScreen(
 private fun BoxScope.SearchScreenActiveContent(
     query: String,
     artItems: LazyPagingItems<ArtImage>,
+    savedArtIds: Set<Long>,
+    onSaveClick: (ArtImage) -> Unit,
     onEmptyTagClick: (String) -> Unit,
     onEmptyClearAndExploreClick: () -> Unit,
 ) {
@@ -104,7 +109,12 @@ private fun BoxScope.SearchScreenActiveContent(
                     onClearAndExploreClick = onEmptyClearAndExploreClick,
                 )
             } else {
-                SearchScreenResults(query = query, artItems = artItems)
+                SearchScreenResults(
+                    query = query,
+                    artItems = artItems,
+                    savedArtIds = savedArtIds,
+                    onSaveClick = onSaveClick,
+                )
             }
         }
     }

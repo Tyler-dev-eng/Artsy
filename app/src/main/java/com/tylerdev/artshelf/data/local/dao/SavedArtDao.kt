@@ -25,4 +25,10 @@ interface SavedArtDao {
 
     @Query("SELECT EXISTS(SELECT 1 FROM ${SavedArtEntity.TABLE_NAME} WHERE id = :id)")
     fun isSaved(id: Long): Flow<Boolean>
+
+    @Query("SELECT EXISTS(SELECT 1 FROM ${SavedArtEntity.TABLE_NAME})")
+    fun hasSavedArt(): Flow<Boolean>
+
+    @Query("SELECT id FROM ${SavedArtEntity.TABLE_NAME}")
+    fun getAllIds(): Flow<List<Long>>
 }
