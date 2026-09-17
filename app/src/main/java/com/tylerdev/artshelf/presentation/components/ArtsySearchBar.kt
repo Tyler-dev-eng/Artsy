@@ -2,6 +2,7 @@ package com.tylerdev.artshelf.presentation.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -18,8 +19,11 @@ import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.graphicsLayer
@@ -62,6 +66,9 @@ fun ArtsySearchBar(
     placeholder: String = "search for art…",
     notchColor: Color = Background,
 ) {
+    val focusRequester = remember { FocusRequester() }
+    val interactionSource = remember { MutableInteractionSource() }
+
     Box(modifier = modifier.fillMaxWidth().padding(top = 20.dp)) {
         Row(
             modifier =
@@ -69,6 +76,10 @@ fun ArtsySearchBar(
                     .fillMaxWidth()
                     .drawHardOffsetShadow(SEARCH_BAR_SHADOW_OFFSET, InkBlack)
                     .background(PaperCream)
+                    .clickable(
+                        interactionSource = interactionSource,
+                        indication = null,
+                    ) { focusRequester.requestFocus() }
                     .padding(SEARCH_BAR_OUTER_PADDING)
                     .padding(start = SEARCH_BAR_START_PADDING, end = SEARCH_BAR_END_PADDING),
             verticalAlignment = Alignment.CenterVertically,
@@ -84,6 +95,7 @@ fun ArtsySearchBar(
                 query = query,
                 onQueryChange = onQueryChange,
                 placeholder = placeholder,
+                focusRequester = focusRequester,
                 modifier = Modifier.weight(1f),
             )
             SearchSubmitButton(onClick = onSearchSubmit)
@@ -109,6 +121,7 @@ private fun SearchBarInput(
     query: String,
     onQueryChange: (String) -> Unit,
     placeholder: String,
+    focusRequester: FocusRequester,
     modifier: Modifier = Modifier,
 ) {
     Box(modifier = modifier) {
@@ -129,6 +142,7 @@ private fun SearchBarInput(
                 letterSpacing = QUERY_TEXT_LETTER_SPACING,
             ),
             cursorBrush = SolidColor(SignalRed),
+            modifier = Modifier.fillMaxWidth().focusRequester(focusRequester),
         )
     }
 }
