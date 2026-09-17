@@ -35,11 +35,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
@@ -68,7 +65,6 @@ import com.tylerdev.artshelf.presentation.ui.theme.SurfaceContainerHighest
 private val SCREEN_MARGIN = 20.dp
 private val SECTION_GAP = 24.dp
 private val TOUCH_TARGET = 48.dp
-private val DEFAULT_CATEGORIES = listOf("All Works", "Paintings", "Sculpture", "Photography", "Surrealism")
 
 private sealed class FeedGroupSpec {
     data class Feature(
@@ -143,9 +139,6 @@ fun SearchScreenResults(
         ) {
             item(key = "active-query-banner") {
                 ActiveQueryBanner(query = query, resultCount = artItems.itemCount)
-            }
-            item(key = "category-filter-chips") {
-                CategoryFilterChips()
             }
             itemsIndexed(feedGroups, key = { index, _ -> index }, contentType = { _, group -> group::class }) { index, group ->
                 Column {
@@ -343,34 +336,6 @@ private fun ActiveQueryBanner(
                         .graphicsLayer { rotationZ = -6f }
                         .background(InkBlack)
                         .padding(horizontal = 8.dp, vertical = 3.dp),
-            )
-        }
-    }
-}
-
-@Suppress("ktlint:standard:function-naming")
-@Composable
-private fun CategoryFilterChips(categories: List<String> = DEFAULT_CATEGORIES) {
-    var selectedIndex by rememberSaveable { mutableIntStateOf(0) }
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
-        modifier = Modifier.horizontalScroll(rememberScrollState()),
-    ) {
-        categories.forEachIndexed { index, category ->
-            val isSelected = index == selectedIndex
-            Text(
-                text = category,
-                style = MaterialTheme.typography.labelLarge,
-                color = if (isSelected) InkBlack else PaperCream,
-                modifier =
-                    Modifier
-                        .defaultMinSize(minHeight = TOUCH_TARGET)
-                        .graphicsLayer { rotationZ = if (index % 2 == 0) -2f else 1f }
-                        .drawHardOffsetShadow(3.dp, if (isSelected) SignalRed else InkBlack)
-                        .background(if (isSelected) GalleryWhite else SurfaceContainerHigh)
-                        .clickable { selectedIndex = index }
-                        .semantics { contentDescription = "Filter by $category" }
-                        .padding(horizontal = 16.dp, vertical = 12.dp),
             )
         }
     }
