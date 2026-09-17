@@ -1,5 +1,8 @@
 package com.tylerdev.artshelf.presentation.screens.search
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -16,9 +19,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.CircularProgressIndicator
@@ -26,9 +32,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -41,6 +50,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
+import kotlinx.coroutines.launch
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
@@ -117,29 +127,78 @@ fun SearchScreenResults(
     onSaveClick: (ArtImage) -> Unit = {},
 ) {
     val feedGroups = remember(artItems.itemCount) { buildFeedGroupSpecs(artItems.itemCount) }
+    val listState = rememberLazyListState()
+    val coroutineScope = rememberCoroutineScope()
 
-    LazyColumn(
-        modifier = modifier.fillMaxSize(),
-        contentPadding = PaddingValues(horizontal = SCREEN_MARGIN, vertical = SECTION_GAP),
-        verticalArrangement = Arrangement.spacedBy(SECTION_GAP),
-    ) {
-        item(key = "active-query-banner") {
-            ActiveQueryBanner(query = query, resultCount = artItems.itemCount)
-        }
-        item(key = "category-filter-chips") {
-            CategoryFilterChips(categories = DEFAULT_CATEGORIES)
-        }
-        itemsIndexed(feedGroups, key = { index, _ -> index }, contentType = { _, group -> group::class }) { index, group ->
-            Column {
-                FeedGroupContent(group = group, artItems = artItems, savedArtIds = savedArtIds, onSaveClick = onSaveClick)
-                if (index != feedGroups.lastIndex) {
-                    Spacer1()
-                    DiscoveryDividerBand()
+    LaunchedEffect(query) {
+        listState.scrollToItem(0)
+    }
+
+    Box(modifier = modifier.fillMaxSize()) {
+        LazyColumn(
+            state = listState,
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(horizontal = SCREEN_MARGIN, vertical = SECTION_GAP),
+            verticalArrangement = Arrangement.spacedBy(SECTION_GAP),
+        ) {
+            item(key = "active-query-banner") {
+                ActiveQueryBanner(query = query, resultCount = artItems.itemCount)
+            }
+            item(key = "category-filter-chips") {
+                CategoryFilterChips(categories = DEFAULT_CATEGORIES)
+            }
+            itemsIndexed(feedGroups, key = { index, _ -> index }, contentType = { _, group -> group::class }) { index, group ->
+                Column {
+                    FeedGroupContent(group = group, artItems = artItems, savedArtIds = savedArtIds, onSaveClick = onSaveClick)
+                    if (index != feedGroups.lastIndex) {
+                        Spacer1()
+                        DiscoveryDividerBand()
+                    }
                 }
             }
+            item(key = "append-load-state") {
+                AppendLoadStateFooter(loadState = artItems.loadState.append, onRetry = artItems::retry)
+            }
         }
-        item(key = "append-load-state") {
-            AppendLoadStateFooter(loadState = artItems.loadState.append, onRetry = artItems::retry)
+        ScrollToTopButton(
+            listState = listState,
+            onClick = { coroutineScope.launch { listState.animateScrollToItem(0) } },
+            modifier = Modifier.align(Alignment.BottomEnd).padding(SCREEN_MARGIN),
+        )
+    }
+}
+
+@Suppress("ktlint:standard:function-naming")
+@Composable
+private fun ScrollToTopButton(
+    listState: LazyListState,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val isVisible by remember { derivedStateOf { listState.firstVisibleItemIndex > 0 } }
+
+    AnimatedVisibility(
+        visible = isVisible,
+        enter = fadeIn(),
+        exit = fadeOut(),
+        modifier = modifier,
+    ) {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .size(TOUCH_TARGET + 8.dp)
+                .graphicsLayer { rotationZ = -3f }
+                .drawHardOffsetShadow(3.dp, SunflowerYellow)
+                .background(InkBlack)
+                .clickable(onClick = onClick)
+                .semantics { contentDescription = "Scroll to top" },
+        ) {
+            Icon(
+                imageVector = Icons.Filled.KeyboardArrowUp,
+                contentDescription = null,
+                tint = GalleryWhite,
+                modifier = Modifier.size(28.dp),
+            )
         }
     }
 }
