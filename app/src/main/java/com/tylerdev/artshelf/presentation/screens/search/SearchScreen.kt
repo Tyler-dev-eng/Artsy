@@ -1,10 +1,9 @@
 package com.tylerdev.artshelf.presentation.screens.search
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -34,43 +33,44 @@ fun SearchScreen(
         modifier = modifier.fillMaxSize(),
         topBar = { ArtShelfTopBar(title = "SEARCH") },
     ) { innerPadding ->
-        Column(modifier = Modifier.padding(innerPadding)) {
+        Column(modifier = Modifier.padding(innerPadding).fillMaxSize()) {
             ArtsySearchBar(
                 query = query,
                 onQueryChange = viewModel::onQueryChanged,
                 modifier = Modifier.padding(horizontal = SCREEN_HORIZONTAL_MARGIN),
             )
 
-            when (uiState) {
-                is SearchUiState.Idle -> {
-                    SearchScreenInitialState(
-                        onSeedClick = viewModel::onQueryChanged,
-                        onFeaturedSeedClick = viewModel::onQueryChanged,
-                        onSignalClick = viewModel::onQueryChanged,
-                    )
-                }
+            Box(modifier = Modifier.weight(1f)) {
+                when (uiState) {
+                    is SearchUiState.Idle -> {
+                        SearchScreenInitialState(
+                            onSeedClick = viewModel::onQueryChanged,
+                            onFeaturedSeedClick = viewModel::onQueryChanged,
+                            onSignalClick = viewModel::onQueryChanged,
+                        )
+                    }
 
-                is SearchUiState.Loading -> {
-                    CircularProgressIndicator()
-                }
+                    is SearchUiState.Loading -> {
+                        CircularProgressIndicator()
+                    }
 
-                is SearchUiState.Empty -> {
-                    SearchScreenEmptyState(
-                        onTagClick = viewModel::onQueryChanged,
-                        onClearAndExploreClick = { viewModel.onQueryChanged("") },
-                    )
-                }
+                    is SearchUiState.Empty -> {
+                        SearchScreenEmptyState(
+                            onTagClick = viewModel::onQueryChanged,
+                            onClearAndExploreClick = { viewModel.onQueryChanged("") },
+                        )
+                    }
 
-                is SearchUiState.Error -> {
-                    Text(text = (uiState as SearchUiState.Error).message)
-                }
+                    is SearchUiState.Error -> {
+                        Text(text = (uiState as SearchUiState.Error).message)
+                    }
 
-                is SearchUiState.Success -> {
-                    val artImages = (uiState as SearchUiState.Success).artImages
-                    LazyColumn {
-                        items(artImages) { artImage ->
-                            Text(text = artImage.tags.joinToString())
-                        }
+                    is SearchUiState.Success -> {
+                        val artImages = (uiState as SearchUiState.Success).artImages
+                        SearchScreenResults(
+                            query = query,
+                            artImages = artImages,
+                        )
                     }
                 }
             }
