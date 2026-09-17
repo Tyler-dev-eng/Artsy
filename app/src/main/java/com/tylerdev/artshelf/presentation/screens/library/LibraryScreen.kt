@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.compose.collectAsLazyPagingItems
+import com.tylerdev.artshelf.domain.model.ArtImage
 import com.tylerdev.artshelf.presentation.components.ArtShelfTopBar
 import com.tylerdev.artshelf.presentation.screens.library.state.LibraryUiState
 import com.tylerdev.artshelf.presentation.screens.library.viewmodel.LibraryViewModel
@@ -22,6 +23,7 @@ import com.tylerdev.artshelf.presentation.ui.theme.SignalRed
 fun LibraryScreen(
     modifier: Modifier = Modifier,
     onExploreClick: () -> Unit = {},
+    onArtClick: (ArtImage) -> Unit = {},
     viewModel: LibraryViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -47,6 +49,7 @@ fun LibraryScreen(
                     artItems = savedArtItems,
                     modifier = Modifier.padding(innerPadding),
                     onRemoveClick = viewModel::onRemoveClick,
+                    onArtClick = onArtClick,
                 )
             }
         }

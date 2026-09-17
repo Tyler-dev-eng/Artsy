@@ -57,6 +57,7 @@ fun LibraryScreenResults(
     artItems: LazyPagingItems<ArtImage>,
     modifier: Modifier = Modifier,
     onRemoveClick: (ArtImage) -> Unit = {},
+    onArtClick: (ArtImage) -> Unit = {},
 ) {
     LazyColumn(
         modifier = modifier.fillMaxSize(),
@@ -76,6 +77,7 @@ fun LibraryScreenResults(
                 art = art,
                 rotationDegrees = CARD_ROTATIONS[index % CARD_ROTATIONS.size],
                 onRemoveClick = { onRemoveClick(art) },
+                onClick = { onArtClick(art) },
             )
         }
         item(key = "append-load-state") {
@@ -125,6 +127,7 @@ private fun SavedArtCard(
     art: ArtImage,
     rotationDegrees: Float,
     onRemoveClick: () -> Unit,
+    onClick: () -> Unit,
 ) {
     Box(
         modifier = Modifier
@@ -136,6 +139,7 @@ private fun SavedArtCard(
                 .fillMaxWidth()
                 .drawHardOffsetShadow(6.dp, InkBlack)
                 .background(InkBlack)
+                .clickable(onClick = onClick)
                 .padding(8.dp),
         ) {
             Box(

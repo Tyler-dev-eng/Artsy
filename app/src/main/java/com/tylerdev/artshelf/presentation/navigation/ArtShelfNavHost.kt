@@ -76,6 +76,7 @@ fun ArtShelfNavHost(
                             launchSingleTop = true
                         }
                     },
+                    onArtClick = { art -> navController.navigate(Screen.ArtworkDetail.createRoute(art)) },
                 )
             }
             composable(Screen.ArtworkDetail.route, arguments = ARTWORK_DETAIL_ARGUMENTS) {
