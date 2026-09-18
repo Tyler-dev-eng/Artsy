@@ -33,11 +33,18 @@ class SavedArtRepositoryImpl
 
         override fun getSavedArtIds(): Flow<Set<Long>> = savedArtDao.getAllIds().map { it.toSet() }
 
+        override fun getArtById(id: Long): Flow<ArtImage?> =
+            savedArtDao.getById(id).map { it?.toArtImage() }
+
         override suspend fun saveArt(artImage: ArtImage) {
             savedArtDao.upsert(artImage.toSavedArtEntity(savedAtEpochMillis = System.currentTimeMillis()))
         }
 
         override suspend fun removeArt(id: Long) {
             savedArtDao.deleteById(id)
+        }
+
+        override suspend fun updateArtNotes(id: Long, notes: String?) {
+            savedArtDao.updateNotes(id, notes)
         }
     }

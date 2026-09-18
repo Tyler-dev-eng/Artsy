@@ -7,7 +7,7 @@ import com.tylerdev.artshelf.data.local.entity.SavedArtEntity
 
 @Database(
     entities = [SavedArtEntity::class],
-    version = 1,
+    version = 2,
 )
 abstract class ArtShelfDatabase : RoomDatabase() {
     abstract fun savedArtDao(): SavedArtDao

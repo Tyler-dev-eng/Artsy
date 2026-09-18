@@ -20,6 +20,7 @@ data class SavedArtEntity(
     val likes: Int,
     val downloads: Int,
     val savedAtEpochMillis: Long,
+    val notes: String? = null,
 ) {
     companion object {
         const val TABLE_NAME = "saved_art"

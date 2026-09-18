@@ -10,4 +10,5 @@ data class ArtImage(
     val userName: String,
     val likes: Int,
     val downloads: Int,
+    val notes: String? = null,
 )

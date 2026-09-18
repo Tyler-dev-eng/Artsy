@@ -4,12 +4,18 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tylerdev.artshelf.domain.model.ArtImage
+import com.tylerdev.artshelf.domain.usecase.GetSavedArtByIdUseCase
 import com.tylerdev.artshelf.domain.usecase.IsArtSavedUseCase
 import com.tylerdev.artshelf.domain.usecase.ToggleSaveArtUseCase
+import com.tylerdev.artshelf.domain.usecase.UpdateArtNotesUseCase
 import com.tylerdev.artshelf.presentation.screens.artworkdetail.state.ArtworkDetailUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -37,20 +43,47 @@ class ArtworkDetailViewModel
     constructor(
         savedStateHandle: SavedStateHandle,
         private val toggleSaveArtUseCase: ToggleSaveArtUseCase,
+        private val updateArtNotesUseCase: UpdateArtNotesUseCase,
         isArtSavedUseCase: IsArtSavedUseCase,
+        getSavedArtByIdUseCase: GetSavedArtByIdUseCase,
     ) : ViewModel() {
-        private val art: ArtImage = savedStateHandle.toArtImage()
+        private val navArt: ArtImage = savedStateHandle.toArtImage()
+
+        private val _isEditDialogVisible = MutableStateFlow(false)
+        val isEditDialogVisible: StateFlow<Boolean> = _isEditDialogVisible.asStateFlow()
 
         val uiState: StateFlow<ArtworkDetailUiState> =
-            isArtSavedUseCase(art.id)
-                .map { isSaved -> ArtworkDetailUiState.Content(art = art, isSaved = isSaved) }
-                .stateIn(
+            isArtSavedUseCase(navArt.id)
+                .flatMapLatest { isSaved ->
+                    if (isSaved) {
+                        getSavedArtByIdUseCase(navArt.id).map { savedArt ->
+                            ArtworkDetailUiState.Content(art = savedArt ?: navArt, isSaved = true)
+                        }
+                    } else {
+                        flowOf(ArtworkDetailUiState.Content(art = navArt, isSaved = false))
+                    }
+                }.stateIn(
                     scope = viewModelScope,
                     started = SharingStarted.WhileSubscribed(UI_STATE_STOP_TIMEOUT_MILLIS),
-                    initialValue = ArtworkDetailUiState.Content(art = art, isSaved = false),
+                    initialValue = ArtworkDetailUiState.Content(art = navArt, isSaved = false),
                 )
 
         fun onSaveClick() {
-            viewModelScope.launch { toggleSaveArtUseCase(art) }
+            viewModelScope.launch { toggleSaveArtUseCase(navArt) }
+        }
+
+        fun onEditClick() {
+            _isEditDialogVisible.value = true
+        }
+
+        fun onDismissEditDialog() {
+            _isEditDialogVisible.value = false
+        }
+
+        fun onSaveNotes(notes: String) {
+            viewModelScope.launch {
+                updateArtNotesUseCase(navArt.id, notes)
+                _isEditDialogVisible.value = false
+            }
         }
     }

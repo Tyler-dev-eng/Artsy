@@ -9,30 +9,41 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
@@ -44,6 +55,7 @@ import com.tylerdev.artshelf.presentation.screens.artworkdetail.state.ArtworkDet
 import com.tylerdev.artshelf.presentation.screens.artworkdetail.viewmodel.ArtworkDetailViewModel
 import com.tylerdev.artshelf.presentation.ui.theme.Background
 import com.tylerdev.artshelf.presentation.ui.theme.GalleryWhite
+import com.tylerdev.artshelf.presentation.ui.theme.Graphite
 import com.tylerdev.artshelf.presentation.ui.theme.InkBlack
 import com.tylerdev.artshelf.presentation.ui.theme.PaperCream
 import com.tylerdev.artshelf.presentation.ui.theme.SignalRed
@@ -53,6 +65,9 @@ import com.tylerdev.artshelf.presentation.ui.theme.SurfaceContainerHigh
 private val SCREEN_MARGIN = 20.dp
 private val SECTION_GAP = 20.dp
 private val TOUCH_TARGET = 48.dp
+private val NOTES_INPUT_MIN_HEIGHT = 120.dp
+private val DIALOG_SHADOW_OFFSET = 6.dp
+private val DIALOG_PADDING = 20.dp
 
 @Suppress("ktlint:standard:function-naming")
 @Composable
@@ -62,6 +77,7 @@ fun ArtworkDetailScreen(
     viewModel: ArtworkDetailViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val isEditDialogVisible by viewModel.isEditDialogVisible.collectAsStateWithLifecycle()
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -73,8 +89,16 @@ fun ArtworkDetailScreen(
                     art = state.art,
                     isSaved = state.isSaved,
                     onSaveClick = viewModel::onSaveClick,
+                    onEditClick = viewModel::onEditClick,
                     modifier = Modifier.padding(innerPadding),
                 )
+                if (isEditDialogVisible) {
+                    EditNotesDialog(
+                        initialNotes = state.art.notes.orEmpty(),
+                        onDismiss = viewModel::onDismissEditDialog,
+                        onSave = viewModel::onSaveNotes,
+                    )
+                }
             }
         }
     }
@@ -123,6 +147,7 @@ private fun ArtworkDetailContent(
     art: ArtImage,
     isSaved: Boolean,
     onSaveClick: () -> Unit,
+    onEditClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -137,6 +162,9 @@ private fun ArtworkDetailContent(
         ArtworkInfoPanel(art = art)
         if (art.tags.isNotEmpty()) {
             ArtworkTagRow(tags = art.tags)
+        }
+        if (isSaved) {
+            ArtworkNotesPanel(notes = art.notes, onEditClick = onEditClick)
         }
     }
 }
@@ -269,5 +297,158 @@ private fun ArtworkTagRow(tags: List<String>) {
                         .padding(horizontal = 12.dp, vertical = 8.dp),
             )
         }
+    }
+}
+
+@Suppress("ktlint:standard:function-naming")
+@Composable
+private fun ArtworkNotesPanel(
+    notes: String?,
+    onEditClick: () -> Unit,
+) {
+    Column(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .drawHardOffsetShadow(4.dp, InkBlack)
+                .background(PaperCream)
+                .padding(16.dp),
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = "NOTES",
+                style = MaterialTheme.typography.labelSmall,
+                color = InkBlack,
+            )
+            ArtworkEditButton(onClick = onEditClick)
+        }
+        Text(
+            text = notes?.takeIf { it.isNotBlank() } ?: "Add your own notes about this piece…",
+            style = MaterialTheme.typography.bodyMedium,
+            color = if (notes.isNullOrBlank()) Graphite else InkBlack,
+            modifier = Modifier.padding(top = 8.dp),
+        )
+    }
+}
+
+@Suppress("ktlint:standard:function-naming")
+@Composable
+private fun ArtworkEditButton(onClick: () -> Unit) {
+    Box(
+        modifier =
+            Modifier
+                .size(32.dp)
+                .drawHardOffsetShadow(2.dp, InkBlack)
+                .background(SunflowerYellow)
+                .clickable(onClick = onClick)
+                .semantics { contentDescription = "Edit notes" },
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            imageVector = Icons.Filled.Edit,
+            contentDescription = null,
+            tint = InkBlack,
+            modifier = Modifier.size(18.dp),
+        )
+    }
+}
+
+@Suppress("ktlint:standard:function-naming")
+@Composable
+private fun EditNotesDialog(
+    initialNotes: String,
+    onDismiss: () -> Unit,
+    onSave: (String) -> Unit,
+) {
+    var notes by remember { mutableStateOf(initialNotes) }
+
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false),
+    ) {
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(SCREEN_MARGIN)
+                    .drawHardOffsetShadow(DIALOG_SHADOW_OFFSET, InkBlack)
+                    .background(PaperCream)
+                    .padding(DIALOG_PADDING),
+        ) {
+            Text(
+                text = "EDIT NOTES",
+                style = MaterialTheme.typography.headlineLarge,
+                color = InkBlack,
+            )
+            Box(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(top = 12.dp)
+                        .heightIn(min = NOTES_INPUT_MIN_HEIGHT)
+                        .drawHardOffsetShadow(2.dp, InkBlack)
+                        .background(GalleryWhite)
+                        .padding(12.dp),
+            ) {
+                if (notes.isEmpty()) {
+                    Text(
+                        text = "Add your own notes about this piece…",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Graphite,
+                    )
+                }
+                BasicTextField(
+                    value = notes,
+                    onValueChange = { notes = it },
+                    textStyle =
+                        LocalTextStyle.current.merge(MaterialTheme.typography.bodyMedium).copy(color = InkBlack),
+                    cursorBrush = SolidColor(SignalRed),
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
+                horizontalArrangement = Arrangement.End,
+            ) {
+                DialogTextButton(text = "CANCEL", color = SurfaceContainerHigh, onClick = onDismiss)
+                DialogTextButton(
+                    text = "SAVE",
+                    color = SignalRed,
+                    textColor = GalleryWhite,
+                    onClick = { onSave(notes) },
+                    modifier = Modifier.padding(start = 12.dp),
+                )
+            }
+        }
+    }
+}
+
+@Suppress("ktlint:standard:function-naming")
+@Composable
+private fun DialogTextButton(
+    text: String,
+    color: Color,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    textColor: Color = InkBlack,
+) {
+    Box(
+        modifier =
+            modifier
+                .drawHardOffsetShadow(2.dp, InkBlack)
+                .background(color)
+                .clickable(onClick = onClick)
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.labelSmall,
+            color = textColor,
+        )
     }
 }

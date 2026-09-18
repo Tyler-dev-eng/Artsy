@@ -31,4 +31,10 @@ interface SavedArtDao {
 
     @Query("SELECT id FROM ${SavedArtEntity.TABLE_NAME}")
     fun getAllIds(): Flow<List<Long>>
+
+    @Query("SELECT * FROM ${SavedArtEntity.TABLE_NAME} WHERE id = :id")
+    fun getById(id: Long): Flow<SavedArtEntity?>
+
+    @Query("UPDATE ${SavedArtEntity.TABLE_NAME} SET notes = :notes WHERE id = :id")
+    suspend fun updateNotes(id: Long, notes: String?)
 }

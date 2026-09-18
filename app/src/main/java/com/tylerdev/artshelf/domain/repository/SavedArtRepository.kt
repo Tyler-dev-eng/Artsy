@@ -9,6 +9,8 @@ interface SavedArtRepository {
     fun isArtSaved(id: Long): Flow<Boolean>
     fun hasSavedArt(): Flow<Boolean>
     fun getSavedArtIds(): Flow<Set<Long>>
+    fun getArtById(id: Long): Flow<ArtImage?>
     suspend fun saveArt(artImage: ArtImage)
     suspend fun removeArt(id: Long)
+    suspend fun updateArtNotes(id: Long, notes: String?)
 }
