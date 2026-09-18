@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.CircularProgressIndicator
@@ -49,6 +50,7 @@ import com.tylerdev.artshelf.presentation.ui.theme.SurfaceContainerHigh
 private val SCREEN_MARGIN = 20.dp
 private val SECTION_GAP = 24.dp
 private val TOUCH_TARGET = 48.dp
+private val NOTE_INDICATOR_SIZE = 28.dp
 private val CARD_ROTATIONS = listOf(-1f, 3f, -3f)
 private const val CATALOG_TAG_PREFIX = "#"
 
@@ -158,6 +160,9 @@ private fun SavedArtCard(
                     onClick = onRemoveClick,
                     modifier = Modifier.align(Alignment.TopEnd).padding(8.dp),
                 )
+                if (!art.notes.isNullOrBlank()) {
+                    NoteIndicator(modifier = Modifier.align(Alignment.TopStart).padding(8.dp))
+                }
             }
             SavedArtPlaque(art = art, modifier = Modifier.padding(top = 8.dp))
         }
@@ -217,6 +222,26 @@ private fun UnsaveButton(
             contentDescription = null,
             tint = SunflowerYellow,
             modifier = Modifier.size(24.dp),
+        )
+    }
+}
+
+@Suppress("ktlint:standard:function-naming")
+@Composable
+private fun NoteIndicator(modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .size(NOTE_INDICATOR_SIZE)
+            .drawHardOffsetShadow(2.dp, InkBlack)
+            .background(SunflowerYellow)
+            .semantics { contentDescription = "Has notes" },
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            imageVector = Icons.Filled.Edit,
+            contentDescription = null,
+            tint = InkBlack,
+            modifier = Modifier.size(16.dp),
         )
     }
 }
