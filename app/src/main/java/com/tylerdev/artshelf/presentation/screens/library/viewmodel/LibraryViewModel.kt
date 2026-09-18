@@ -8,6 +8,7 @@ import com.tylerdev.artshelf.domain.model.ArtImage
 import com.tylerdev.artshelf.domain.usecase.GetSavedArtUseCase
 import com.tylerdev.artshelf.domain.usecase.HasSavedArtUseCase
 import com.tylerdev.artshelf.domain.usecase.ToggleSaveArtUseCase
+import com.tylerdev.artshelf.domain.usecase.UploadArtUseCase
 import com.tylerdev.artshelf.presentation.screens.library.state.LibraryUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
@@ -28,6 +29,7 @@ class LibraryViewModel
         getSavedArtUseCase: GetSavedArtUseCase,
         hasSavedArtUseCase: HasSavedArtUseCase,
         private val toggleSaveArtUseCase: ToggleSaveArtUseCase,
+        private val uploadArtUseCase: UploadArtUseCase,
     ) : ViewModel() {
 
         val uiState: StateFlow<LibraryUiState> =
@@ -45,5 +47,9 @@ class LibraryViewModel
 
         fun onRemoveClick(artImage: ArtImage) {
             viewModelScope.launch { toggleSaveArtUseCase(artImage) }
+        }
+
+        fun onImagePicked(sourceUriString: String) {
+            viewModelScope.launch { runCatching { uploadArtUseCase(sourceUriString) } }
         }
     }
