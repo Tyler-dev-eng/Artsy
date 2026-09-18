@@ -14,4 +14,5 @@ interface SavedArtRepository {
     suspend fun saveUploadedArt(sourceUriString: String): ArtImage
     suspend fun removeArt(id: Long)
     suspend fun updateArtNotes(id: Long, notes: String?)
+    suspend fun updateArtDetails(id: Long, title: String?, userName: String)
 }

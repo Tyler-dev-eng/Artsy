@@ -36,6 +36,7 @@ import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import com.tylerdev.artshelf.domain.model.ArtImage
+import com.tylerdev.artshelf.domain.model.displayTitle
 import com.tylerdev.artshelf.presentation.components.drawHardOffsetShadow
 import com.tylerdev.artshelf.presentation.ui.theme.GalleryWhite
 import com.tylerdev.artshelf.presentation.ui.theme.Graphite
@@ -233,7 +234,7 @@ private fun SavedArtPlaque(
             .padding(12.dp),
     ) {
         Text(
-            text = savedArtTitle(art),
+            text = art.displayTitle(),
             style = MaterialTheme.typography.headlineSmall,
             color = InkBlack,
             maxLines = 1,
@@ -245,8 +246,6 @@ private fun SavedArtPlaque(
         )
     }
 }
-
-private fun savedArtTitle(art: ArtImage): String = art.tags.take(2).joinToString(" ") { it.trim().uppercase() }
 
 @Suppress("ktlint:standard:function-naming")
 @Composable

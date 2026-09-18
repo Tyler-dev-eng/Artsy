@@ -15,6 +15,7 @@ fun SavedArtEntity.toArtImage(): ArtImage = ArtImage(
     likes = likes,
     downloads = downloads,
     notes = notes,
+    title = title,
 )
 
 fun ArtImage.toSavedArtEntity(savedAtEpochMillis: Long): SavedArtEntity = SavedArtEntity(
@@ -29,4 +30,5 @@ fun ArtImage.toSavedArtEntity(savedAtEpochMillis: Long): SavedArtEntity = SavedA
     downloads = downloads,
     savedAtEpochMillis = savedAtEpochMillis,
     notes = notes,
+    title = title,
 )

@@ -5,6 +5,7 @@ import androidx.room.Room
 import com.tylerdev.artshelf.data.local.ArtShelfDatabase
 import com.tylerdev.artshelf.data.local.MIGRATION_1_2
 import com.tylerdev.artshelf.data.local.MIGRATION_2_3
+import com.tylerdev.artshelf.data.local.MIGRATION_3_4
 import com.tylerdev.artshelf.data.local.dao.RecentSearchDao
 import com.tylerdev.artshelf.data.local.dao.SavedArtDao
 import dagger.Module
@@ -24,7 +25,7 @@ object DatabaseModule {
     @Singleton
     fun provideArtShelfDatabase(@ApplicationContext context: Context): ArtShelfDatabase =
         Room.databaseBuilder(context, ArtShelfDatabase::class.java, DATABASE_NAME)
-            .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+            .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
             .build()
 
     @Provides

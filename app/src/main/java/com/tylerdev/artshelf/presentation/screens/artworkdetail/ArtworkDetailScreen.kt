@@ -50,6 +50,7 @@ import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import com.tylerdev.artshelf.domain.model.ArtImage
+import com.tylerdev.artshelf.domain.model.displayTitle
 import com.tylerdev.artshelf.presentation.components.drawHardOffsetShadow
 import com.tylerdev.artshelf.presentation.screens.artworkdetail.state.ArtworkDetailUiState
 import com.tylerdev.artshelf.presentation.screens.artworkdetail.viewmodel.ArtworkDetailViewModel
@@ -78,6 +79,7 @@ fun ArtworkDetailScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val isEditDialogVisible by viewModel.isEditDialogVisible.collectAsStateWithLifecycle()
+    val isEditDetailsDialogVisible by viewModel.isEditDetailsDialogVisible.collectAsStateWithLifecycle()
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -90,6 +92,7 @@ fun ArtworkDetailScreen(
                     isSaved = state.isSaved,
                     onSaveClick = viewModel::onSaveClick,
                     onEditClick = viewModel::onEditClick,
+                    onEditDetailsClick = viewModel::onEditDetailsClick,
                     modifier = Modifier.padding(innerPadding),
                 )
                 if (isEditDialogVisible) {
@@ -97,6 +100,14 @@ fun ArtworkDetailScreen(
                         initialNotes = state.art.notes.orEmpty(),
                         onDismiss = viewModel::onDismissEditDialog,
                         onSave = viewModel::onSaveNotes,
+                    )
+                }
+                if (isEditDetailsDialogVisible) {
+                    EditDetailsDialog(
+                        initialTitle = state.art.displayTitle(),
+                        initialUserName = state.art.userName,
+                        onDismiss = viewModel::onDismissEditDetailsDialog,
+                        onSave = viewModel::onSaveDetails,
                     )
                 }
             }
@@ -148,6 +159,7 @@ private fun ArtworkDetailContent(
     isSaved: Boolean,
     onSaveClick: () -> Unit,
     onEditClick: () -> Unit,
+    onEditDetailsClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -159,7 +171,7 @@ private fun ArtworkDetailContent(
         verticalArrangement = Arrangement.spacedBy(SECTION_GAP),
     ) {
         ArtworkHeroImage(art = art, isSaved = isSaved, onSaveClick = onSaveClick)
-        ArtworkInfoPanel(art = art)
+        ArtworkInfoPanel(art = art, isSaved = isSaved, onEditDetailsClick = onEditDetailsClick)
         if (art.tags.isNotEmpty()) {
             ArtworkTagRow(tags = art.tags)
         }
@@ -240,7 +252,11 @@ private fun ArtworkSaveButton(
 
 @Suppress("ktlint:standard:function-naming")
 @Composable
-private fun ArtworkInfoPanel(art: ArtImage) {
+private fun ArtworkInfoPanel(
+    art: ArtImage,
+    isSaved: Boolean,
+    onEditDetailsClick: () -> Unit,
+) {
     Column(
         modifier =
             Modifier
@@ -250,11 +266,20 @@ private fun ArtworkInfoPanel(art: ArtImage) {
                 .background(InkBlack)
                 .padding(16.dp),
     ) {
-        Text(
-            text = art.tags.take(2).joinToString(" ") { it.trim().uppercase() },
-            style = MaterialTheme.typography.headlineLarge,
-            color = GalleryWhite,
-        )
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Text(
+                text = art.displayTitle(),
+                style = MaterialTheme.typography.headlineLarge,
+                color = GalleryWhite,
+            )
+            if (isSaved) {
+                ArtworkEditButton(onClick = onEditDetailsClick)
+            }
+        }
         Text(
             text = "@${art.userName}",
             style = MaterialTheme.typography.bodySmall,
@@ -423,6 +448,100 @@ private fun EditNotesDialog(
                     modifier = Modifier.padding(start = 12.dp),
                 )
             }
+        }
+    }
+}
+
+@Suppress("ktlint:standard:function-naming")
+@Composable
+private fun EditDetailsDialog(
+    initialTitle: String,
+    initialUserName: String,
+    onDismiss: () -> Unit,
+    onSave: (title: String, userName: String) -> Unit,
+) {
+    var title by remember { mutableStateOf(initialTitle) }
+    var userName by remember { mutableStateOf(initialUserName) }
+
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false),
+    ) {
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(SCREEN_MARGIN)
+                    .drawHardOffsetShadow(DIALOG_SHADOW_OFFSET, InkBlack)
+                    .background(PaperCream)
+                    .padding(DIALOG_PADDING),
+        ) {
+            Text(
+                text = "EDIT DETAILS",
+                style = MaterialTheme.typography.headlineLarge,
+                color = InkBlack,
+            )
+            DetailsInputField(
+                label = "TITLE",
+                value = title,
+                onValueChange = { title = it },
+                modifier = Modifier.padding(top = 12.dp),
+            )
+            DetailsInputField(
+                label = "ARTIST NAME",
+                value = userName,
+                onValueChange = { userName = it },
+                modifier = Modifier.padding(top = 12.dp),
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
+                horizontalArrangement = Arrangement.End,
+            ) {
+                DialogTextButton(text = "CANCEL", color = SurfaceContainerHigh, onClick = onDismiss)
+                DialogTextButton(
+                    text = "SAVE",
+                    color = SignalRed,
+                    textColor = GalleryWhite,
+                    onClick = { onSave(title, userName) },
+                    modifier = Modifier.padding(start = 12.dp),
+                )
+            }
+        }
+    }
+}
+
+@Suppress("ktlint:standard:function-naming")
+@Composable
+private fun DetailsInputField(
+    label: String,
+    value: String,
+    onValueChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier = modifier.fillMaxWidth()) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall,
+            color = Graphite,
+        )
+        Box(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(top = 4.dp)
+                    .drawHardOffsetShadow(2.dp, InkBlack)
+                    .background(GalleryWhite)
+                    .padding(12.dp),
+        ) {
+            BasicTextField(
+                value = value,
+                onValueChange = onValueChange,
+                singleLine = true,
+                textStyle =
+                    LocalTextStyle.current.merge(MaterialTheme.typography.bodyMedium).copy(color = InkBlack),
+                cursorBrush = SolidColor(SignalRed),
+                modifier = Modifier.fillMaxWidth(),
+            )
         }
     }
 }

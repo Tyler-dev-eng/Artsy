@@ -11,4 +11,10 @@ data class ArtImage(
     val likes: Int,
     val downloads: Int,
     val notes: String? = null,
+    val title: String? = null,
 )
+
+private const val DEFAULT_TITLE_TAG_COUNT = 2
+
+fun ArtImage.displayTitle(): String =
+    title ?: tags.take(DEFAULT_TITLE_TAG_COUNT).joinToString(" ") { it.trim().uppercase() }

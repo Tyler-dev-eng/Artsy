@@ -85,4 +85,8 @@ class SavedArtRepositoryImpl
         override suspend fun updateArtNotes(id: Long, notes: String?) {
             savedArtDao.updateNotes(id, notes)
         }
+
+        override suspend fun updateArtDetails(id: Long, title: String?, userName: String) {
+            savedArtDao.updateDetails(id, title, userName)
+        }
     }

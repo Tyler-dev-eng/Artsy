@@ -7,6 +7,7 @@ import com.tylerdev.artshelf.domain.model.ArtImage
 import com.tylerdev.artshelf.domain.usecase.GetSavedArtByIdUseCase
 import com.tylerdev.artshelf.domain.usecase.IsArtSavedUseCase
 import com.tylerdev.artshelf.domain.usecase.ToggleSaveArtUseCase
+import com.tylerdev.artshelf.domain.usecase.UpdateArtDetailsUseCase
 import com.tylerdev.artshelf.domain.usecase.UpdateArtNotesUseCase
 import com.tylerdev.artshelf.presentation.screens.artworkdetail.state.ArtworkDetailUiState
 import io.mockk.coEvery
@@ -30,6 +31,7 @@ class ArtworkDetailViewModelTest {
 
     private val mockToggleSaveArtUseCase = mockk<ToggleSaveArtUseCase>()
     private val mockUpdateArtNotesUseCase = mockk<UpdateArtNotesUseCase>()
+    private val mockUpdateArtDetailsUseCase = mockk<UpdateArtDetailsUseCase>()
     private val mockIsArtSavedUseCase = mockk<IsArtSavedUseCase>()
     private val mockGetSavedArtByIdUseCase = mockk<GetSavedArtByIdUseCase>()
 
@@ -54,6 +56,7 @@ class ArtworkDetailViewModelTest {
             savedStateHandle = buildSavedStateHandle(),
             toggleSaveArtUseCase = mockToggleSaveArtUseCase,
             updateArtNotesUseCase = mockUpdateArtNotesUseCase,
+            updateArtDetailsUseCase = mockUpdateArtDetailsUseCase,
             isArtSavedUseCase = mockIsArtSavedUseCase,
             getSavedArtByIdUseCase = mockGetSavedArtByIdUseCase,
         )
@@ -101,6 +104,36 @@ class ArtworkDetailViewModelTest {
 
             coVerify { mockUpdateArtNotesUseCase(NAV_ART.id, "updated notes") }
             assertThat(viewModel.isEditDialogVisible.value).isFalse()
+        }
+
+    @Test
+    fun `onEditDetailsClick shows dialog and onDismissEditDetailsDialog hides it`() =
+        runTest {
+            val viewModel = buildViewModel(savedArt = NAV_ART)
+
+            viewModel.isEditDetailsDialogVisible.test {
+                assertThat(awaitItem()).isFalse()
+
+                viewModel.onEditDetailsClick()
+                assertThat(awaitItem()).isTrue()
+
+                viewModel.onDismissEditDetailsDialog()
+                assertThat(awaitItem()).isFalse()
+            }
+        }
+
+    @Test
+    fun `onSaveDetails persists title and artist name and hides dialog`() =
+        runTest {
+            coEvery { mockUpdateArtDetailsUseCase(any(), any(), any()) } returns Unit
+            val viewModel = buildViewModel(savedArt = NAV_ART)
+            viewModel.onEditDetailsClick()
+
+            viewModel.onSaveDetails("new title", "new artist")
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            coVerify { mockUpdateArtDetailsUseCase(NAV_ART.id, "new title", "new artist") }
+            assertThat(viewModel.isEditDetailsDialogVisible.value).isFalse()
         }
 
     private companion object {

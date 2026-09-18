@@ -37,4 +37,7 @@ interface SavedArtDao {
 
     @Query("UPDATE ${SavedArtEntity.TABLE_NAME} SET notes = :notes WHERE id = :id")
     suspend fun updateNotes(id: Long, notes: String?)
+
+    @Query("UPDATE ${SavedArtEntity.TABLE_NAME} SET title = :title, userName = :userName WHERE id = :id")
+    suspend fun updateDetails(id: Long, title: String?, userName: String)
 }

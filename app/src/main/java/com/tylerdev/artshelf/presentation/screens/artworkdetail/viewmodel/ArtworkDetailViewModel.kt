@@ -7,6 +7,7 @@ import com.tylerdev.artshelf.domain.model.ArtImage
 import com.tylerdev.artshelf.domain.usecase.GetSavedArtByIdUseCase
 import com.tylerdev.artshelf.domain.usecase.IsArtSavedUseCase
 import com.tylerdev.artshelf.domain.usecase.ToggleSaveArtUseCase
+import com.tylerdev.artshelf.domain.usecase.UpdateArtDetailsUseCase
 import com.tylerdev.artshelf.domain.usecase.UpdateArtNotesUseCase
 import com.tylerdev.artshelf.presentation.screens.artworkdetail.state.ArtworkDetailUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -44,6 +45,7 @@ class ArtworkDetailViewModel
         savedStateHandle: SavedStateHandle,
         private val toggleSaveArtUseCase: ToggleSaveArtUseCase,
         private val updateArtNotesUseCase: UpdateArtNotesUseCase,
+        private val updateArtDetailsUseCase: UpdateArtDetailsUseCase,
         isArtSavedUseCase: IsArtSavedUseCase,
         getSavedArtByIdUseCase: GetSavedArtByIdUseCase,
     ) : ViewModel() {
@@ -51,6 +53,9 @@ class ArtworkDetailViewModel
 
         private val _isEditDialogVisible = MutableStateFlow(false)
         val isEditDialogVisible: StateFlow<Boolean> = _isEditDialogVisible.asStateFlow()
+
+        private val _isEditDetailsDialogVisible = MutableStateFlow(false)
+        val isEditDetailsDialogVisible: StateFlow<Boolean> = _isEditDetailsDialogVisible.asStateFlow()
 
         val uiState: StateFlow<ArtworkDetailUiState> =
             isArtSavedUseCase(navArt.id)
@@ -84,6 +89,21 @@ class ArtworkDetailViewModel
             viewModelScope.launch {
                 updateArtNotesUseCase(navArt.id, notes)
                 _isEditDialogVisible.value = false
+            }
+        }
+
+        fun onEditDetailsClick() {
+            _isEditDetailsDialogVisible.value = true
+        }
+
+        fun onDismissEditDetailsDialog() {
+            _isEditDetailsDialogVisible.value = false
+        }
+
+        fun onSaveDetails(title: String, userName: String) {
+            viewModelScope.launch {
+                updateArtDetailsUseCase(navArt.id, title, userName)
+                _isEditDetailsDialogVisible.value = false
             }
         }
     }
