@@ -5,7 +5,12 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.tylerdev.artshelf.domain.model.ArtImage
+import com.tylerdev.artshelf.domain.model.RecentSearch
+import com.tylerdev.artshelf.domain.usecase.ClearRecentSearchesUseCase
+import com.tylerdev.artshelf.domain.usecase.GetRecentSearchesUseCase
 import com.tylerdev.artshelf.domain.usecase.GetSavedArtIdsUseCase
+import com.tylerdev.artshelf.domain.usecase.RecordSearchUseCase
+import com.tylerdev.artshelf.domain.usecase.RemoveRecentSearchUseCase
 import com.tylerdev.artshelf.domain.usecase.SearchArtUseCase
 import com.tylerdev.artshelf.domain.usecase.ToggleSaveArtUseCase
 import com.tylerdev.artshelf.presentation.screens.search.state.SearchUiState
@@ -36,7 +41,11 @@ class SearchViewModel
     constructor(
         private val searchArtUseCase: SearchArtUseCase,
         private val toggleSaveArtUseCase: ToggleSaveArtUseCase,
+        private val recordSearchUseCase: RecordSearchUseCase,
+        private val removeRecentSearchUseCase: RemoveRecentSearchUseCase,
+        private val clearRecentSearchesUseCase: ClearRecentSearchesUseCase,
         getSavedArtIdsUseCase: GetSavedArtIdsUseCase,
+        getRecentSearchesUseCase: GetRecentSearchesUseCase,
     ) : ViewModel() {
         private val _query = MutableStateFlow("")
         val query: StateFlow<String> = _query
@@ -66,11 +75,36 @@ class SearchViewModel
                     initialValue = emptySet(),
                 )
 
+        val recentSearches: StateFlow<List<RecentSearch>> =
+            getRecentSearchesUseCase()
+                .stateIn(
+                    scope = viewModelScope,
+                    started = SharingStarted.WhileSubscribed(UI_STATE_STOP_TIMEOUT_MILLIS),
+                    initialValue = emptyList(),
+                )
+
         fun onQueryChanged(newQuery: String) {
             _query.value = newQuery
         }
 
+        fun onQueryCommitted(term: String) {
+            _query.value = term
+            viewModelScope.launch { recordSearchUseCase(term) }
+        }
+
+        fun onSearchSubmitted() {
+            viewModelScope.launch { recordSearchUseCase(_query.value) }
+        }
+
         fun onSaveClick(artImage: ArtImage) {
             viewModelScope.launch { toggleSaveArtUseCase(artImage) }
+        }
+
+        fun onRemoveRecentSearch(term: String) {
+            viewModelScope.launch { removeRecentSearchUseCase(term) }
+        }
+
+        fun onClearRecentSearches() {
+            viewModelScope.launch { clearRecentSearchesUseCase() }
         }
     }

@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Search
@@ -30,6 +32,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import com.tylerdev.artshelf.presentation.ui.theme.Background
@@ -94,6 +97,7 @@ fun ArtsySearchBar(
             SearchBarInput(
                 query = query,
                 onQueryChange = onQueryChange,
+                onSearchSubmit = onSearchSubmit,
                 placeholder = placeholder,
                 focusRequester = focusRequester,
                 modifier = Modifier.weight(1f),
@@ -120,6 +124,7 @@ fun ArtsySearchBar(
 private fun SearchBarInput(
     query: String,
     onQueryChange: (String) -> Unit,
+    onSearchSubmit: () -> Unit,
     placeholder: String,
     focusRequester: FocusRequester,
     modifier: Modifier = Modifier,
@@ -142,6 +147,8 @@ private fun SearchBarInput(
                 letterSpacing = QUERY_TEXT_LETTER_SPACING,
             ),
             cursorBrush = SolidColor(SignalRed),
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+            keyboardActions = KeyboardActions(onSearch = { onSearchSubmit() }),
             modifier = Modifier.fillMaxWidth().focusRequester(focusRequester),
         )
     }

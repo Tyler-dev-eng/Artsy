@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -20,10 +19,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.HideImage
 import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.NorthEast
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -39,6 +35,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
+import com.tylerdev.artshelf.domain.model.RecentSearch
 import com.tylerdev.artshelf.presentation.components.drawHardOffsetShadow
 import com.tylerdev.artshelf.presentation.ui.theme.AntonFontFamily
 import com.tylerdev.artshelf.presentation.ui.theme.GalleryWhite
@@ -49,7 +46,10 @@ import com.tylerdev.artshelf.presentation.ui.theme.PaperCream
 import com.tylerdev.artshelf.presentation.ui.theme.SignalRed
 import com.tylerdev.artshelf.presentation.ui.theme.SunflowerYellow
 import com.tylerdev.artshelf.presentation.ui.theme.SurfaceContainerHigh
-import com.tylerdev.artshelf.presentation.ui.theme.SurfaceContainerLow
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
+import java.time.temporal.ChronoUnit
 
 private val SCREEN_MARGIN = 20.dp
 private val SECTION_GAP = 24.dp
@@ -65,12 +65,6 @@ data class SeedPrompt(
     val badge: String? = null,
 )
 
-data class RecentSignal(
-    val term: String,
-    val meta: String,
-    val isStarred: Boolean = false,
-)
-
 private val DEFAULT_SEED_PROMPTS =
     listOf(
         SeedPrompt("neo-dadaism", "#NEO-DADAISM", InkBlack, GalleryWhite, SignalRed, -2f),
@@ -81,12 +75,16 @@ private val DEFAULT_SEED_PROMPTS =
         SeedPrompt("street glitch", "STREET GLITCH", SunflowerYellow, InkBlack, InkBlack, 1f),
     )
 
-private val DEFAULT_RECENT_SIGNALS =
-    listOf(
-        RecentSignal("yellow flowers", "14:02 EST • 842 ARTWORKS", isStarred = true),
-        RecentSignal("brutalist concrete", "YESTERDAY • ARCHITECTURE ARCHIVE"),
-        RecentSignal("tokyo neon dusk", "2 DAYS AGO • STREET PHOTOGRAPHY"),
-    )
+private fun RecentSearch.toMetaText(): String {
+    val zone = ZoneId.systemDefault()
+    val searchedAt = Instant.ofEpochMilli(searchedAtEpochMillis).atZone(zone)
+    val daysAgo = ChronoUnit.DAYS.between(searchedAt.toLocalDate(), LocalDate.now(zone))
+    return when {
+        daysAgo <= 0L -> "TODAY • %02d:%02d".format(searchedAt.hour, searchedAt.minute)
+        daysAgo == 1L -> "YESTERDAY"
+        else -> "$daysAgo DAYS AGO"
+    }
+}
 
 private val HeadlineXlMobile =
     TextStyle(
@@ -103,9 +101,7 @@ fun SearchScreenInitialState(
     modifier: Modifier = Modifier,
     seedPrompts: List<SeedPrompt> = DEFAULT_SEED_PROMPTS,
     onSeedClick: (String) -> Unit = {},
-    featuredSeedQuery: String = "yellow flowers",
-    onFeaturedSeedClick: (String) -> Unit = {},
-    recentSignals: List<RecentSignal> = DEFAULT_RECENT_SIGNALS,
+    recentSearches: List<RecentSearch> = emptyList(),
     onSignalClick: (String) -> Unit = {},
     onRemoveSignal: (String) -> Unit = {},
     onClearAllSignals: () -> Unit = {},
@@ -122,10 +118,8 @@ fun SearchScreenInitialState(
         Spacer(modifier = Modifier.height(SECTION_GAP))
         RadarSeedsSection(seedPrompts = seedPrompts, onSeedClick = onSeedClick)
         Spacer(modifier = Modifier.height(SECTION_GAP))
-        FeaturedSpotlightCard(onInjectClick = { onFeaturedSeedClick(featuredSeedQuery) })
-        Spacer(modifier = Modifier.height(SECTION_GAP))
         RecentSignalsLedger(
-            signals = recentSignals,
+            signals = recentSearches,
             onSignalClick = onSignalClick,
             onRemoveSignal = onRemoveSignal,
             onClearAllSignals = onClearAllSignals,
@@ -270,142 +264,8 @@ private fun SeedPill(
 
 @Suppress("ktlint:standard:function-naming")
 @Composable
-private fun FeaturedSpotlightCard(onInjectClick: () -> Unit) {
-    Box(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .graphicsLayer { rotationZ = 1f }
-                .drawHardOffsetShadow(6.dp, SignalRed)
-                .background(InkBlack)
-                .padding(16.dp),
-    ) {
-        Column {
-            Row(
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Text(
-                    text = "DAILY TRANSMISSION",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = GalleryWhite,
-                    modifier = Modifier.background(SignalRed).padding(horizontal = 6.dp, vertical = 2.dp),
-                )
-                Icon(
-                    imageVector = Icons.Filled.Star,
-                    contentDescription = null,
-                    tint = SunflowerYellow,
-                    modifier = Modifier.size(20.dp),
-                )
-            }
-            Spacer(modifier = Modifier.height(12.dp))
-            FeaturedArtworkPreview()
-            Spacer(modifier = Modifier.height(12.dp))
-            Text(
-                text = "TODAY'S SEED: YELLOW FLOWERS",
-                style = MaterialTheme.typography.headlineLarge,
-                color = GalleryWhite,
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text =
-                    "Explore 140+ deconstructed floral prints, tactile oil studies, and " +
-                        "aggressive yellow pigment explorations.",
-                style = MaterialTheme.typography.bodySmall,
-                color = OnSurfaceVariant,
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-            InjectSeedButton(onClick = onInjectClick)
-        }
-    }
-}
-
-@Suppress("ktlint:standard:function-naming")
-@Composable
-private fun FeaturedArtworkPreview() {
-    Box(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .aspectRatio(16f / 10f)
-                .drawHardOffsetShadow(3.dp, InkBlack)
-                .background(SurfaceContainerLow),
-        contentAlignment = Alignment.Center,
-    ) {
-        Icon(
-            imageVector = Icons.Filled.HideImage,
-            contentDescription = null,
-            tint = SunflowerYellow.copy(alpha = 0.4f),
-            modifier = Modifier.size(40.dp),
-        )
-        Text(
-            text = "99.4% HIT",
-            style = MaterialTheme.typography.labelMedium,
-            color = InkBlack,
-            modifier =
-                Modifier
-                    .align(Alignment.TopEnd)
-                    .background(SunflowerYellow)
-                    .padding(horizontal = 8.dp, vertical = 2.dp),
-        )
-        Column(
-            modifier =
-                Modifier
-                    .align(Alignment.BottomStart)
-                    .graphicsLayer { rotationZ = -2f }
-                    .background(PaperCream)
-                    .padding(horizontal = 10.dp, vertical = 6.dp),
-        ) {
-            Text(
-                text = "SOLARIS ARCHIVE // 04",
-                style = MaterialTheme.typography.headlineLarge,
-                color = InkBlack,
-            )
-            Text(
-                text = "Curated by Artsy Underground",
-                style = MaterialTheme.typography.bodySmall,
-                color = InkBlack.copy(alpha = 0.7f),
-            )
-        }
-    }
-}
-
-@Suppress("ktlint:standard:function-naming")
-@Composable
-private fun InjectSeedButton(onClick: () -> Unit) {
-    Row(
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .defaultMinSize(minHeight = TOUCH_TARGET)
-                .graphicsLayer { rotationZ = -1f }
-                .drawHardOffsetShadow(4.dp, PaperCream)
-                .background(SignalRed)
-                .clickable(onClick = onClick)
-                .semantics { contentDescription = "Inject curated seed" }
-                .padding(horizontal = 16.dp, vertical = 14.dp),
-    ) {
-        Text(
-            text = "INJECT CURATED SEED",
-            style = MaterialTheme.typography.labelLarge,
-            color = GalleryWhite,
-        )
-        Icon(
-            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-            contentDescription = null,
-            tint = GalleryWhite,
-            modifier = Modifier.size(20.dp),
-        )
-    }
-}
-
-@Suppress("ktlint:standard:function-naming")
-@Composable
 private fun RecentSignalsLedger(
-    signals: List<RecentSignal>,
+    signals: List<RecentSearch>,
     onSignalClick: (String) -> Unit,
     onRemoveSignal: (String) -> Unit,
     onClearAllSignals: () -> Unit,
@@ -453,7 +313,7 @@ private fun RecentSignalsLedger(
 @Suppress("ktlint:standard:function-naming")
 @Composable
 private fun RecentSignalsCard(
-    signals: List<RecentSignal>,
+    signals: List<RecentSearch>,
     onSignalClick: (String) -> Unit,
     onRemoveSignal: (String) -> Unit,
 ) {
@@ -481,7 +341,7 @@ private fun RecentSignalsCard(
             modifier = Modifier.fillMaxWidth(),
         ) {
             Text(
-                text = "LOG-STATE: PRISTINE_IDLE",
+                text = "LOG-STATE: ${signals.size} TRACKED",
                 style = MaterialTheme.typography.bodySmall,
                 color = InkBlack.copy(alpha = 0.6f),
             )
@@ -498,7 +358,7 @@ private fun RecentSignalsCard(
 @Suppress("ktlint:standard:function-naming")
 @Composable
 private fun RecentSignalRow(
-    signal: RecentSignal,
+    signal: RecentSearch,
     onClick: () -> Unit,
     onRemove: () -> Unit,
 ) {
@@ -514,9 +374,9 @@ private fun RecentSignalRow(
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(
-                imageVector = if (signal.isStarred) Icons.Filled.Star else Icons.Filled.NorthEast,
+                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                 contentDescription = null,
-                tint = if (signal.isStarred) SunflowerYellow else InkBlack.copy(alpha = 0.6f),
+                tint = InkBlack.copy(alpha = 0.6f),
                 modifier = Modifier.size(18.dp),
             )
             Spacer(modifier = Modifier.width(10.dp))
@@ -527,7 +387,7 @@ private fun RecentSignalRow(
                     color = InkBlack,
                 )
                 Text(
-                    text = signal.meta,
+                    text = signal.toMetaText(),
                     style = MaterialTheme.typography.bodySmall,
                     color = InkBlack.copy(alpha = 0.6f),
                 )

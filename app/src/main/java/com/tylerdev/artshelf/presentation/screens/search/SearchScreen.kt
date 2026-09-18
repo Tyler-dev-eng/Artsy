@@ -42,6 +42,7 @@ fun SearchScreen(
     val query by viewModel.query.collectAsStateWithLifecycle()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val savedArtIds by viewModel.savedArtIds.collectAsStateWithLifecycle()
+    val recentSearches by viewModel.recentSearches.collectAsStateWithLifecycle()
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -51,6 +52,7 @@ fun SearchScreen(
             ArtsySearchBar(
                 query = query,
                 onQueryChange = viewModel::onQueryChanged,
+                onSearchSubmit = viewModel::onSearchSubmitted,
                 modifier = Modifier.padding(horizontal = SCREEN_HORIZONTAL_MARGIN),
             )
 
@@ -58,9 +60,11 @@ fun SearchScreen(
                 when (uiState) {
                     is SearchUiState.Idle -> {
                         SearchScreenInitialState(
-                            onSeedClick = viewModel::onQueryChanged,
-                            onFeaturedSeedClick = viewModel::onQueryChanged,
-                            onSignalClick = viewModel::onQueryChanged,
+                            onSeedClick = viewModel::onQueryCommitted,
+                            recentSearches = recentSearches,
+                            onSignalClick = viewModel::onQueryCommitted,
+                            onRemoveSignal = viewModel::onRemoveRecentSearch,
+                            onClearAllSignals = viewModel::onClearRecentSearches,
                         )
                     }
 
@@ -72,7 +76,7 @@ fun SearchScreen(
                             savedArtIds = savedArtIds,
                             onSaveClick = viewModel::onSaveClick,
                             onArtClick = onArtClick,
-                            onEmptyTagClick = viewModel::onQueryChanged,
+                            onEmptyTagClick = viewModel::onQueryCommitted,
                             onEmptyClearAndExploreClick = { viewModel.onQueryChanged("") },
                         )
                     }

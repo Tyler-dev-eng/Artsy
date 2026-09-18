@@ -4,6 +4,8 @@ import android.content.Context
 import androidx.room.Room
 import com.tylerdev.artshelf.data.local.ArtShelfDatabase
 import com.tylerdev.artshelf.data.local.MIGRATION_1_2
+import com.tylerdev.artshelf.data.local.MIGRATION_2_3
+import com.tylerdev.artshelf.data.local.dao.RecentSearchDao
 import com.tylerdev.artshelf.data.local.dao.SavedArtDao
 import dagger.Module
 import dagger.Provides
@@ -22,10 +24,14 @@ object DatabaseModule {
     @Singleton
     fun provideArtShelfDatabase(@ApplicationContext context: Context): ArtShelfDatabase =
         Room.databaseBuilder(context, ArtShelfDatabase::class.java, DATABASE_NAME)
-            .addMigrations(MIGRATION_1_2)
+            .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
             .build()
 
     @Provides
     @Singleton
     fun provideSavedArtDao(database: ArtShelfDatabase): SavedArtDao = database.savedArtDao()
+
+    @Provides
+    @Singleton
+    fun provideRecentSearchDao(database: ArtShelfDatabase): RecentSearchDao = database.recentSearchDao()
 }
