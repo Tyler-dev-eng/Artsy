@@ -1,4 +1,4 @@
-# ArtShelf
+# Artsy
 
 An Android app for discovering artwork from [Pixabay](https://pixabay.com/), saving pieces to a personal library, annotating them with notes, and uploading your own images alongside curated art.
 
