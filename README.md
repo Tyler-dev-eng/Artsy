@@ -9,6 +9,20 @@ An Android app for discovering artwork from [Pixabay](https://pixabay.com/), sav
 - **Artwork details** — view full artwork details, edit a title, and attach personal notes to saved pieces. Pieces with notes show a badge in the library grid.
 - **Device uploads** — add your own images from the device alongside saved Pixabay art.
 
+## Screenshots
+
+| Splash | Intro | Search |
+|---|---|---|
+| ![Splash screen](docs/screenshots/splash.png) | ![Intro screen](docs/screenshots/intro.png) | ![Search screen](docs/screenshots/search.png) |
+
+| Search results | Artwork detail | Edit notes |
+|---|---|---|
+| ![Search results](docs/screenshots/search_results.png) | ![Artwork detail screen](docs/screenshots/artwork_detail.png) | ![Edit notes dialog](docs/screenshots/edit_notes.png) |
+
+| Library |
+|---|
+| ![Library screen](docs/screenshots/library.png) |
+
 ## Architecture
 
 Clean Architecture with MVVM on top:
