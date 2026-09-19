@@ -28,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
@@ -51,6 +52,8 @@ private val SCREEN_MARGIN = 20.dp
 private val SECTION_GAP = 24.dp
 private val TOUCH_TARGET = 48.dp
 private val NOTE_INDICATOR_SIZE = 28.dp
+
+internal fun noteIndicatorTestTag(artId: Long): String = "note_indicator_$artId"
 private val CARD_ROTATIONS = listOf(-1f, 3f, -3f)
 private const val CATALOG_TAG_PREFIX = "#"
 
@@ -161,7 +164,12 @@ private fun SavedArtCard(
                     modifier = Modifier.align(Alignment.TopEnd).padding(8.dp),
                 )
                 if (!art.notes.isNullOrBlank()) {
-                    NoteIndicator(modifier = Modifier.align(Alignment.TopStart).padding(8.dp))
+                    NoteIndicator(
+                        modifier = Modifier
+                            .align(Alignment.TopStart)
+                            .padding(8.dp)
+                            .testTag(noteIndicatorTestTag(art.id)),
+                    )
                 }
             }
             SavedArtPlaque(art = art, modifier = Modifier.padding(top = 8.dp))
