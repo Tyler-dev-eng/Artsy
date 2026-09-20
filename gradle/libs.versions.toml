@@ -3,6 +3,7 @@
 agp = "9.2.1"
 kotlin = "2.2.10"
 ksp = "2.3.9"
+composeNavGraph = "0.3.0"
 
 # Core Libraries
 coreKtx = "1.19.0"
@@ -122,4 +123,5 @@ android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 dagger = { id = "com.google.dagger.hilt.android", version.ref = "hiltVersion" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+compose-nav-graph = { id = "com.github.skydoves.navgraph", version.ref = "composeNavGraph" }
 

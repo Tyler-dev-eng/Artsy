@@ -13,17 +13,24 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
+import com.github.skydoves.navgraph.annotations.NavDestination
+import com.github.skydoves.navgraph.annotations.NavEdge
+import com.github.skydoves.navgraph.annotations.NavPreview
 import com.tylerdev.artshelf.domain.model.ArtImage
 import com.tylerdev.artshelf.presentation.components.ArtShelfTopBar
 import com.tylerdev.artshelf.presentation.components.ArtsySearchBar
+import com.tylerdev.artshelf.presentation.navigation.Screen
+import com.tylerdev.artshelf.presentation.preview.previewArtItems
 import com.tylerdev.artshelf.presentation.screens.search.state.SearchUiState
 import com.tylerdev.artshelf.presentation.screens.search.viewmodel.SearchViewModel
+import com.tylerdev.artshelf.presentation.ui.theme.ArtShelfTheme
 import retrofit2.HttpException
 import java.io.IOException
 
@@ -33,6 +40,9 @@ private const val SERVER_ERROR_MESSAGE = "Something went wrong on the server."
 private const val GENERIC_ERROR_MESSAGE = "Something went wrong."
 
 @Suppress("ktlint:standard:function-naming")
+@NavDestination(route = Screen.Search::class)
+@NavEdge(to = Screen.ArtworkDetail::class, label = "Open artwork")
+@NavEdge(to = Screen.Library::class, label = "Switch to library")
 @Composable
 fun SearchScreen(
     modifier: Modifier = Modifier,
@@ -134,3 +144,35 @@ private fun Throwable.toUserMessage(): String =
         is HttpException -> SERVER_ERROR_MESSAGE
         else -> GENERIC_ERROR_MESSAGE
     }
+
+@NavPreview(route = Screen.Search::class, primary = true)
+@Preview
+@Suppress("ktlint:standard:function-naming")
+@Composable
+private fun SearchScreenPreview() {
+    ArtShelfTheme {
+        Scaffold(
+            modifier = Modifier.fillMaxSize(),
+            topBar = { ArtShelfTopBar(title = "SEARCH") },
+        ) { innerPadding ->
+            Column(modifier = Modifier.padding(innerPadding).fillMaxSize()) {
+                ArtsySearchBar(
+                    query = "street art",
+                    onQueryChange = {},
+                    modifier = Modifier.padding(horizontal = SCREEN_HORIZONTAL_MARGIN),
+                )
+                Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
+                    SearchScreenActiveContent(
+                        query = "street art",
+                        artItems = previewArtItems(),
+                        savedArtIds = emptySet(),
+                        onSaveClick = {},
+                        onArtClick = {},
+                        onEmptyTagClick = {},
+                        onEmptyClearAndExploreClick = {},
+                    )
+                }
+            }
+        }
+    }
+}

@@ -23,8 +23,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.github.skydoves.navgraph.annotations.NavDestination
+import com.github.skydoves.navgraph.annotations.NavEdge
+import com.github.skydoves.navgraph.annotations.NavGraphRoot
+import com.github.skydoves.navgraph.annotations.NavPreview
+import com.tylerdev.artshelf.presentation.navigation.Screen
+import com.tylerdev.artshelf.presentation.ui.theme.ArtShelfTheme
 import com.tylerdev.artshelf.presentation.ui.theme.Graphite
 import com.tylerdev.artshelf.presentation.ui.theme.InkBlack
 import com.tylerdev.artshelf.presentation.ui.theme.OnSurfaceVariant
@@ -40,6 +47,9 @@ private const val ICON_ROTATION_DEGREES = -6f
 private const val STRIKE_ROTATION_DEGREES = -4f
 
 @Suppress("ktlint:standard:function-naming")
+@NavGraphRoot
+@NavDestination(route = Screen.Splash::class)
+@NavEdge(to = Screen.Search::class, label = "Finished")
 @Composable
 fun SplashScreen(onFinished: () -> Unit) {
     LaunchedEffect(Unit) {
@@ -93,6 +103,16 @@ fun SplashScreen(onFinished: () -> Unit) {
                     .align(Alignment.BottomCenter)
                     .padding(horizontal = 24.dp, vertical = 40.dp),
         )
+    }
+}
+
+@NavPreview(route = Screen.Splash::class, primary = true)
+@Preview
+@Suppress("ktlint:standard:function-naming")
+@Composable
+private fun SplashScreenPreview() {
+    ArtShelfTheme {
+        SplashScreen(onFinished = {})
     }
 }
 

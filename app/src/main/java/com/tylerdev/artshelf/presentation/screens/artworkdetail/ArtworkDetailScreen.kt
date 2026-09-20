@@ -19,7 +19,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
@@ -41,6 +41,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
@@ -49,11 +50,16 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
+import com.github.skydoves.navgraph.annotations.NavDestination
+import com.github.skydoves.navgraph.annotations.NavPreview
 import com.tylerdev.artshelf.domain.model.ArtImage
 import com.tylerdev.artshelf.domain.model.displayTitle
 import com.tylerdev.artshelf.presentation.components.drawHardOffsetShadow
+import com.tylerdev.artshelf.presentation.navigation.Screen
+import com.tylerdev.artshelf.presentation.preview.PREVIEW_ART_IMAGES
 import com.tylerdev.artshelf.presentation.screens.artworkdetail.state.ArtworkDetailUiState
 import com.tylerdev.artshelf.presentation.screens.artworkdetail.viewmodel.ArtworkDetailViewModel
+import com.tylerdev.artshelf.presentation.ui.theme.ArtShelfTheme
 import com.tylerdev.artshelf.presentation.ui.theme.Background
 import com.tylerdev.artshelf.presentation.ui.theme.GalleryWhite
 import com.tylerdev.artshelf.presentation.ui.theme.Graphite
@@ -71,6 +77,7 @@ private val DIALOG_SHADOW_OFFSET = 6.dp
 private val DIALOG_PADDING = 20.dp
 
 @Suppress("ktlint:standard:function-naming")
+@NavDestination(route = Screen.ArtworkDetail::class)
 @Composable
 fun ArtworkDetailScreen(
     onBackClick: () -> Unit,
@@ -138,7 +145,7 @@ private fun ArtworkDetailTopBar(onBackClick: () -> Unit) {
             contentAlignment = Alignment.Center,
         ) {
             Icon(
-                imageVector = Icons.Filled.ArrowBack,
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                 contentDescription = null,
                 tint = GalleryWhite,
             )
@@ -541,6 +548,28 @@ private fun DetailsInputField(
                     LocalTextStyle.current.merge(MaterialTheme.typography.bodyMedium).copy(color = InkBlack),
                 cursorBrush = SolidColor(SignalRed),
                 modifier = Modifier.fillMaxWidth(),
+            )
+        }
+    }
+}
+
+@NavPreview(route = Screen.ArtworkDetail::class, primary = true)
+@Preview
+@Suppress("ktlint:standard:function-naming")
+@Composable
+private fun ArtworkDetailScreenPreview() {
+    ArtShelfTheme {
+        Scaffold(
+            modifier = Modifier.fillMaxSize(),
+            topBar = { ArtworkDetailTopBar(onBackClick = {}) },
+        ) { innerPadding ->
+            ArtworkDetailContent(
+                art = PREVIEW_ART_IMAGES.first(),
+                isSaved = true,
+                onSaveClick = {},
+                onEditClick = {},
+                onEditDetailsClick = {},
+                modifier = Modifier.padding(innerPadding),
             )
         }
     }
